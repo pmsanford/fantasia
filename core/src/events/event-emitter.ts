@@ -1,4 +1,7 @@
 import type { FantasiaEvent, FantasiaEventType } from '../types.js';
+import logger from '../logger.js';
+
+const log = logger.child('events');
 
 type Handler<T extends FantasiaEvent = FantasiaEvent> = (event: T) => void;
 
@@ -63,6 +66,7 @@ export class FantasiaEventEmitter {
    * Emit an event to all subscribers.
    */
   emit(event: FantasiaEvent): void {
+    log.trace('Event emitted', { type: event.type });
     this.eventHistory.push(event);
     if (this.eventHistory.length > this.maxHistory) {
       this.eventHistory.shift();
@@ -118,6 +122,7 @@ export class FantasiaEventEmitter {
    * Stop the async stream.
    */
   stopStream(): void {
+    log.debug('Event stream stopping');
     this.streamActive = false;
     // Resolve any pending stream promises with a sentinel
     // (the stream generator will exit on next iteration)

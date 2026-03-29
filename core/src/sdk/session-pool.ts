@@ -1,4 +1,7 @@
 import type { SDKQuery, SdkAdapter, SDKOptions, SDKUserMessage } from '../types.js';
+import logger from '../logger.js';
+
+const log = logger.child('sessionPool');
 
 interface ManagedSession {
   agentId: string;
@@ -28,6 +31,7 @@ export class SessionPool {
     // Close existing query for this agent if any
     this.closeQuery(agentId);
 
+    log.debug('Creating query', { agentId });
     const query = this.sdk.query({ prompt, options });
     this.sessions.set(agentId, {
       agentId,
@@ -57,6 +61,7 @@ export class SessionPool {
   closeQuery(agentId: string): void {
     const session = this.sessions.get(agentId);
     if (session) {
+      log.debug('Closing query', { agentId });
       session.query.close();
       this.sessions.delete(agentId);
     }
@@ -66,6 +71,7 @@ export class SessionPool {
    * Close all active queries.
    */
   closeAll(): void {
+    log.debug('Closing all sessions', { count: this.sessions.size });
     for (const [agentId] of this.sessions) {
       this.closeQuery(agentId);
     }

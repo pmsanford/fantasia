@@ -12,6 +12,9 @@ import type {
 import type { FantasiaEventEmitter } from '../events/event-emitter.js';
 import type { MemoryManager } from '../memory/memory-manager.js';
 import { AgentError } from '../errors.js';
+import logger from '../logger.js';
+
+const log = logger.child('agent');
 
 export interface AgentRunOptions {
   prompt: string;
@@ -57,6 +60,7 @@ export abstract class BaseAgent {
       startedAt: Date.now(),
       lastActivityAt: Date.now(),
     };
+    log.debug('Agent created', { id: this.instance.id, role: config.role, name: config.name });
   }
 
   /**
@@ -68,10 +72,20 @@ export abstract class BaseAgent {
    * Run this agent with a prompt and return the result.
    */
   async run(options: AgentRunOptions): Promise<AgentRunResult> {
+    const agentLog = log.child(this.instance.config.role);
+    agentLog.info('run: starting', {
+      id: this.instance.id,
+      name: this.instance.config.name,
+      promptLength: options.prompt.length,
+    });
+
     this.setStatus('working');
 
     const config = this.instance.config;
     const memoryBlock = this.getMemoryBlock();
+    if (memoryBlock) {
+      agentLog.debug('run: memory block injected', { memoryBlockLength: memoryBlock.length });
+    }
 
     const systemPrompt = memoryBlock
       ? `${config.systemPrompt}\n\n${memoryBlock}`
@@ -91,9 +105,14 @@ export abstract class BaseAgent {
       allowDangerouslySkipPermissions: true,
       systemPrompt: { type: 'preset', preset: 'claude_code', append: systemPrompt },
       cwd: options.cwd,
-      env: options.env,
+      ...(options.env && Object.keys(options.env).length > 0 ? { env: options.env } : {}),
+      stderr: (data: string) => {
+        agentLog.debug('run: stderr', { data: data.trim() });
+      },
       ...options.extraSdkOptions,
     };
+
+    agentLog.debug('run: calling sdk.query', { model: config.model });
 
     try {
       const query = this.sdk.query({ prompt: options.prompt, options: sdkOptions });
@@ -106,9 +125,17 @@ export abstract class BaseAgent {
       let durationMs = 0;
       let sessionId = '';
       let success = true;
+      let messageCount = 0;
 
       for await (const message of query) {
+        messageCount++;
         this.instance.lastActivityAt = Date.now();
+
+        agentLog.trace('run: sdk message received', {
+          id: this.instance.id,
+          messageType: message.type,
+          messageCount,
+        });
 
         this.events.emit({
           type: 'sdk:message',
@@ -122,6 +149,7 @@ export abstract class BaseAgent {
             .map((b: any) => b.text);
           if (textBlocks.length > 0) {
             const text = textBlocks.join('\n');
+            agentLog.trace('run: assistant text', { id: this.instance.id, textLength: text.length });
             this.events.emit({
               type: 'agent:message',
               agentId: this.instance.id,
@@ -143,6 +171,11 @@ export abstract class BaseAgent {
           } else {
             success = false;
             output = (message as any).errors?.join('\n') ?? `Error: ${message.subtype}`;
+            agentLog.warn('run: non-success result', {
+              id: this.instance.id,
+              subtype: message.subtype,
+              output: output.slice(0, 200),
+            });
           }
         }
       }
@@ -150,11 +183,33 @@ export abstract class BaseAgent {
       this.currentQuery = null;
       this.setStatus('idle');
 
+      agentLog.info('run: completed', {
+        id: this.instance.id,
+        name: this.instance.config.name,
+        success,
+        costUsd,
+        numTurns,
+        durationMs,
+        messageCount,
+      });
+
       return { success, output, structuredOutput, costUsd, numTurns, durationMs, sessionId };
     } catch (error) {
       this.currentQuery = null;
       this.setStatus('error');
       this.instance.error = String(error);
+      const errObj = error as any;
+      agentLog.error('run: failed', {
+        id: this.instance.id,
+        name: this.instance.config.name,
+        error: String(error),
+        stderr: errObj?.stderr,
+        stdout: errObj?.stdout,
+        exitCode: errObj?.exitCode ?? errObj?.code,
+        stack: errObj?.stack,
+        cause: errObj?.cause ? String(errObj.cause) : undefined,
+        keys: error && typeof error === 'object' ? Object.keys(error) : undefined,
+      });
       throw new AgentError(
         `Agent ${this.instance.config.name} failed: ${error}`,
         this.instance.id,
@@ -167,6 +222,7 @@ export abstract class BaseAgent {
    * Stop the current query if running.
    */
   async stop(): Promise<void> {
+    log.debug('Agent stopping', { id: this.instance.id, role: this.instance.config.role, name: this.instance.config.name });
     if (this.currentQuery) {
       this.currentQuery.close();
       this.currentQuery = null;
@@ -177,6 +233,7 @@ export abstract class BaseAgent {
       agentId: this.instance.id,
       reason: 'stopped',
     });
+    log.debug('Agent stopped', { id: this.instance.id });
   }
 
   /**
@@ -191,6 +248,7 @@ export abstract class BaseAgent {
     const oldStatus = this.instance.status;
     if (oldStatus === status) return;
     this.instance.status = status;
+    log.trace('Agent status changed', { id: this.instance.id, oldStatus, newStatus: status });
     this.events.emit({
       type: 'agent:status-changed',
       agentId: this.instance.id,

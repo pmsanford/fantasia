@@ -1,0 +1,34 @@
+syntax = "proto3";
+package fantasia.v1;
+
+import "fantasia/v1/types.proto";
+
+service EventService {
+  // Server-streaming RPC. Streams events matching the filter.
+  // If include_history is true, replays historical events first,
+  // then streams live events. Stream stays open until client
+  // disconnects or orchestrator stops.
+  rpc Subscribe(SubscribeRequest) returns (stream FantasiaEvent);
+
+  // Get historical events (non-streaming).
+  rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+message SubscribeRequest {
+  // If non-empty, only deliver events whose oneof field name matches.
+  // e.g. ["agent_spawned", "task_completed"]. Empty means all events.
+  repeated string event_types = 1;
+
+  // If true, replay event history before streaming live events.
+  bool include_history = 2;
+
+  // If set with include_history, only replay events with sequence > this value.
+  optional uint64 after_sequence = 3;
+}
+
+message GetHistoryRequest {
+  optional int32 limit = 1;
+}
+message GetHistoryResponse {
+  repeated FantasiaEvent events = 1;
+}

@@ -2,6 +2,9 @@ import { z } from 'zod/v4';
 import type { SdkAdapter, McpSdkServerConfigWithInstance, SdkMcpToolDefinition } from '../types.js';
 import type { TaskQueue } from '../task/task-queue.js';
 import { createTask, isTerminal } from '../task/task.js';
+import logger from '../logger.js';
+
+const log = logger.child('tools');
 
 export interface FantasiaToolContext {
   taskQueue: TaskQueue;
@@ -24,7 +27,10 @@ export function createFantasiaTools(
       priority: z.enum(['critical', 'high', 'normal', 'low']).describe('Task priority'),
     },
     async (args) => {
+      log.info('delegate_task called', { priority: args.priority, descriptionLength: args.description.length });
+      log.debug('delegate_task details', { description: args.description });
       const taskId = await context.onDelegateTask(args.description, args.priority);
+      log.info('delegate_task created', { taskId });
       return {
         content: [{
           type: 'text' as const,
@@ -42,8 +48,10 @@ export function createFantasiaTools(
       task_id: z.string().describe('The task ID to check'),
     },
     async (args) => {
+      log.debug('check_task_status called', { taskId: args.task_id });
       const task = context.taskQueue.get(args.task_id);
       if (!task) {
+        log.debug('check_task_status: task not found', { taskId: args.task_id });
         return {
           content: [{ type: 'text' as const, text: `Task ${args.task_id} not found.` }],
           isError: true,

@@ -1,0 +1,82 @@
+syntax = "proto3";
+package fantasia.v1;
+
+import "fantasia/v1/types.proto";
+
+service MemoryService {
+  rpc Remember(RememberRequest) returns (RememberResponse);
+  rpc Forget(ForgetRequest) returns (ForgetResponse);
+  rpc Recall(RecallRequest) returns (RecallResponse);
+  rpc RecordApproval(RecordApprovalRequest) returns (RecordApprovalResponse);
+  rpc RecordRejection(RecordRejectionRequest) returns (RecordRejectionResponse);
+  rpc RecordLesson(RecordLessonRequest) returns (RecordLessonResponse);
+  rpc Prune(PruneRequest) returns (PruneResponse);
+  rpc GetAll(GetAllMemoriesRequest) returns (GetAllMemoriesResponse);
+}
+
+message RememberRequest {
+  AgentRole agent_role = 1;
+  MemoryType type = 2;
+  string content = 3;
+  string context = 4;
+  repeated string tags = 5;
+}
+message RememberResponse {
+  MemoryEntry entry = 1;
+}
+
+message ForgetRequest {
+  string id = 1;
+}
+message ForgetResponse {
+  bool deleted = 1;
+}
+
+message RecallRequest {
+  AgentRole role = 1;
+  repeated string tags = 2;
+}
+message RecallResponse {
+  repeated MemoryEntry entries = 1;
+}
+
+message RecordApprovalRequest {
+  AgentRole agent_role = 1;
+  string plan_summary = 2;
+  repeated string tags = 3;
+}
+message RecordApprovalResponse {
+  MemoryEntry entry = 1;
+}
+
+message RecordRejectionRequest {
+  AgentRole agent_role = 1;
+  string suggestion = 2;
+  string reason = 3;
+  repeated string tags = 4;
+}
+message RecordRejectionResponse {
+  MemoryEntry entry = 1;
+}
+
+message RecordLessonRequest {
+  AgentRole agent_role = 1;
+  string lesson = 2;
+  string context = 3;
+  repeated string tags = 4;
+}
+message RecordLessonResponse {
+  MemoryEntry entry = 1;
+}
+
+message PruneRequest {
+  optional int32 max_per_role = 1;
+}
+message PruneResponse {
+  int32 pruned_count = 1;
+}
+
+message GetAllMemoriesRequest {}
+message GetAllMemoriesResponse {
+  repeated MemoryEntry entries = 1;
+}

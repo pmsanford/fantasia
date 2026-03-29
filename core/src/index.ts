@@ -25,6 +25,10 @@ export { createFantasiaTools } from './tools/fantasia-tools.js';
 // Task functions
 export { createTask, transitionTask, assignTask, setPlan, setReview, completeTask, addSubtask, isTerminal, getValidTransitions } from './task/task.js';
 
+// Logging
+export { default as logger, setLogLevel, getLogLevel } from './logger.js';
+export type { LogLevel, Logger } from './logger.js';
+
 // Errors
 export { FantasiaError, AgentError, TaskError, OrchestratorError, BudgetExceededError, MaxRetriesError } from './errors.js';
 

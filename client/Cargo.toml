@@ -1,0 +1,20 @@
+[package]
+name = "fantasia-client"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "fantasia"
+path = "src/main.rs"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+prost = "0.13"
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["client", "client-legacy", "http1", "tokio"] }
+http-body-util = "0.1"
+bytes = "1"
+anyhow = "1"

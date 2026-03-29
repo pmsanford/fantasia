@@ -1,0 +1,46 @@
+syntax = "proto3";
+package fantasia.v1;
+
+import "fantasia/v1/types.proto";
+
+service OrchestratorService {
+  // Initialize and start the orchestrator. Must be called before other RPCs.
+  rpc Initialize(InitializeRequest) returns (InitializeResponse);
+
+  // Submit a user message to Mickey.
+  rpc Submit(SubmitRequest) returns (SubmitResponse);
+
+  // Stop the orchestrator gracefully.
+  rpc Stop(StopRequest) returns (StopResponse);
+
+  // Get current status snapshot.
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse);
+
+  // Get cost information.
+  rpc GetCost(GetCostRequest) returns (GetCostResponse);
+}
+
+message InitializeRequest {
+  OrchestratorConfig config = 1;
+}
+message InitializeResponse {}
+
+message SubmitRequest {
+  string user_message = 1;
+}
+message SubmitResponse {}
+
+message StopRequest {}
+message StopResponse {}
+
+message GetStatusRequest {}
+message GetStatusResponse {
+  bool running = 1;
+  repeated AgentInstance agents = 2;
+  TaskCounts task_counts = 3;
+}
+
+message GetCostRequest {}
+message GetCostResponse {
+  CostBreakdown cost = 1;
+}

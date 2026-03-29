@@ -1,5 +1,8 @@
 import type { MemoryEntry, MemoryType, AgentRole } from '../types.js';
 import { MemoryStore } from './memory-store.js';
+import logger from '../logger.js';
+
+const log = logger.child('memory');
 
 /**
  * Higher-level memory manager that handles retrieval, prompt injection,
@@ -39,6 +42,7 @@ export class MemoryManager {
       timestamp: Date.now(),
     };
     await this.store.save(entry);
+    log.debug('Memory remembered', { id: entry.id, role: params.agentRole, type: params.type });
     return entry;
   }
 
@@ -46,6 +50,7 @@ export class MemoryManager {
    * Forget a specific memory.
    */
   async forget(id: string): Promise<boolean> {
+    log.debug('Forgetting memory', { id });
     return this.store.delete(id);
   }
 
@@ -55,6 +60,7 @@ export class MemoryManager {
    */
   recall(role: AgentRole, contextTags?: string[]): MemoryEntry[] {
     const roleMemories = this.store.getByRole(role);
+    log.debug('Recall', { role, contextTags, found: roleMemories.length });
 
     if (!contextTags || contextTags.length === 0) {
       return this.sortByRecency(roleMemories);
@@ -140,6 +146,7 @@ export class MemoryManager {
    * Keeps at most `maxPerRole` memories per agent role.
    */
   async prune(maxPerRole = 50): Promise<number> {
+    log.info('Pruning memories', { maxPerRole });
     let pruned = 0;
     const roles: AgentRole[] = ['mickey', 'yen-sid', 'chernabog', 'broomstick', 'imagineer'];
 
@@ -154,6 +161,7 @@ export class MemoryManager {
       }
     }
 
+    log.info('Prune completed', { pruned });
     return pruned;
   }
 

@@ -1,4 +1,12 @@
+# Node / Bun
 node_modules/
 dist/
-.fantasia/
 *.tsbuildinfo
+bun.lock
+
+# Rust
+target/
+
+# Fantasia runtime
+.fantasia/
+logs/

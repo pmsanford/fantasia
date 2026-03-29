@@ -1,0 +1,27 @@
+syntax = "proto3";
+package fantasia.v1;
+
+import "fantasia/v1/types.proto";
+
+service TaskService {
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+  rpc GetTaskCounts(GetTaskCountsRequest) returns (GetTaskCountsResponse);
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+message GetTaskResponse {
+  optional Task task = 1;
+}
+
+message ListTasksRequest {}
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message GetTaskCountsRequest {}
+message GetTaskCountsResponse {
+  TaskCounts counts = 1;
+}

@@ -1,5 +1,8 @@
 import type { Task, TaskPriority } from '../types.js';
 import { isTerminal } from './task.js';
+import logger from '../logger.js';
+
+const log = logger.child('taskQueue');
 
 const PRIORITY_ORDER: Record<TaskPriority, number> = {
   critical: 0,
@@ -24,6 +27,7 @@ export class TaskQueue {
    * Add a task to the queue.
    */
   add(task: Task): void {
+    log.debug('Task added', { taskId: task.id, priority: task.priority, status: task.status });
     this.tasks.set(task.id, task);
   }
 
@@ -31,6 +35,7 @@ export class TaskQueue {
    * Update a task in the queue.
    */
   update(task: Task): void {
+    log.trace('Task updated', { taskId: task.id, status: task.status });
     this.tasks.set(task.id, task);
   }
 
@@ -45,6 +50,7 @@ export class TaskQueue {
    * Remove a task from the queue.
    */
   remove(taskId: string): boolean {
+    log.debug('Task removed', { taskId });
     return this.tasks.delete(taskId);
   }
 

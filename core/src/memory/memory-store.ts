@@ -1,6 +1,9 @@
 import { readdir, readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { MemoryEntry, AgentRole } from '../types.js';
+import logger from '../logger.js';
+
+const log = logger.child('memoryStore');
 
 /**
  * File-backed persistent storage for agent memories.
@@ -19,14 +22,17 @@ export class MemoryStore {
    * Ensure the memory directory exists and load all entries into cache.
    */
   async initialize(): Promise<void> {
+    log.info('Initializing memory store', { dir: this.dir });
     await mkdir(this.dir, { recursive: true });
     await this.loadAll();
+    log.info('Memory store initialized', { entriesLoaded: this.cache.size });
   }
 
   /**
    * Save a memory entry to disk.
    */
   async save(entry: MemoryEntry): Promise<void> {
+    log.debug('Saving memory entry', { id: entry.id, role: entry.agentRole, type: entry.type });
     const filePath = this.entryPath(entry.id);
     await writeFile(filePath, JSON.stringify(entry, null, 2), 'utf-8');
     this.cache.set(entry.id, entry);
@@ -43,6 +49,7 @@ export class MemoryStore {
    * Delete a memory entry.
    */
   async delete(id: string): Promise<boolean> {
+    log.debug('Deleting memory entry', { id });
     const existed = this.cache.delete(id);
     if (existed) {
       try {
@@ -111,8 +118,8 @@ export class MemoryStore {
           const content = await readFile(join(this.dir, file), 'utf-8');
           const entry: MemoryEntry = JSON.parse(content);
           this.cache.set(entry.id, entry);
-        } catch {
-          // Skip corrupt files
+        } catch (err) {
+          log.warn('Skipping corrupt memory file', { file, error: String(err) });
         }
       }
     } catch {

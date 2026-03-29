@@ -1,0 +1,277 @@
+syntax = "proto3";
+package fantasia.v1;
+
+// ─── Enums ──────────────────────────────────────────
+
+enum AgentRole {
+  AGENT_ROLE_UNSPECIFIED = 0;
+  AGENT_ROLE_MICKEY = 1;
+  AGENT_ROLE_YEN_SID = 2;
+  AGENT_ROLE_CHERNABOG = 3;
+  AGENT_ROLE_BROOMSTICK = 4;
+  AGENT_ROLE_IMAGINEER = 5;
+}
+
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_IDLE = 1;
+  AGENT_STATUS_WORKING = 2;
+  AGENT_STATUS_WAITING = 3;
+  AGENT_STATUS_ERROR = 4;
+  AGENT_STATUS_TERMINATED = 5;
+}
+
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_PLANNING = 2;
+  TASK_STATUS_REVIEWING = 3;
+  TASK_STATUS_IN_PROGRESS = 4;
+  TASK_STATUS_BLOCKED = 5;
+  TASK_STATUS_COMPLETED = 6;
+  TASK_STATUS_FAILED = 7;
+}
+
+enum TaskPriority {
+  TASK_PRIORITY_UNSPECIFIED = 0;
+  TASK_PRIORITY_CRITICAL = 1;
+  TASK_PRIORITY_HIGH = 2;
+  TASK_PRIORITY_NORMAL = 3;
+  TASK_PRIORITY_LOW = 4;
+}
+
+enum MemoryType {
+  MEMORY_TYPE_UNSPECIFIED = 0;
+  MEMORY_TYPE_LESSON = 1;
+  MEMORY_TYPE_REJECTION = 2;
+  MEMORY_TYPE_PREFERENCE = 3;
+  MEMORY_TYPE_PATTERN = 4;
+}
+
+enum EstimatedComplexity {
+  ESTIMATED_COMPLEXITY_UNSPECIFIED = 0;
+  ESTIMATED_COMPLEXITY_TRIVIAL = 1;
+  ESTIMATED_COMPLEXITY_SIMPLE = 2;
+  ESTIMATED_COMPLEXITY_MODERATE = 3;
+  ESTIMATED_COMPLEXITY_COMPLEX = 4;
+}
+
+// ─── Agent messages ─────────────────────────────────
+
+message AgentConfig {
+  AgentRole role = 1;
+  string name = 2;
+  string system_prompt = 3;
+  string model = 4;
+  repeated string tools = 5;
+  repeated string disallowed_tools = 6;
+  repeated string allowed_tools = 7;
+  optional uint32 max_turns = 8;
+  optional double max_budget_usd = 9;
+  optional string effort = 10;
+  optional string output_format = 11;
+  optional bool persist_session = 12;
+  optional string permission_mode = 13;
+  // When tools is a preset like { type: 'preset', preset: 'claude_code' },
+  // this field is set instead of the repeated tools field.
+  optional string tools_preset = 14;
+}
+
+message AgentInstance {
+  string id = 1;
+  AgentConfig config = 2;
+  AgentStatus status = 3;
+  optional string current_task_id = 4;
+  optional string session_id = 5;
+  int64 started_at = 6;
+  int64 last_activity_at = 7;
+  optional string error = 8;
+}
+
+// ─── Task messages ──────────────────────────────────
+
+message SubtaskDef {
+  string description = 1;
+  repeated string dependencies = 2;
+}
+
+message TaskPlan {
+  string summary = 1;
+  repeated string steps = 2;
+  repeated SubtaskDef subtasks = 3;
+  repeated string risks = 4;
+  EstimatedComplexity estimated_complexity = 5;
+}
+
+message TaskReview {
+  bool approved = 1;
+  repeated string concerns = 2;
+  repeated string required_changes = 3;
+  repeated string strengths = 4;
+  int32 iteration = 5;
+}
+
+message TaskResult {
+  bool success = 1;
+  string output = 2;
+  repeated string artifacts = 3;
+  optional double cost_usd = 4;
+  optional int64 duration_ms = 5;
+  // SDK types serialized as JSON bytes (unstable schema)
+  bytes token_usage_json = 6;
+  bytes model_usage_json = 7;
+}
+
+message Task {
+  string id = 1;
+  optional string parent_id = 2;
+  string description = 3;
+  TaskStatus status = 4;
+  TaskPriority priority = 5;
+  optional string assigned_agent_id = 6;
+  string created_by = 7;
+  optional TaskPlan plan = 8;
+  optional TaskReview review = 9;
+  optional TaskResult result = 10;
+  repeated string subtask_ids = 11;
+  int64 created_at = 12;
+  int64 updated_at = 13;
+  // Record<string, unknown> serialized as JSON bytes
+  bytes metadata_json = 14;
+}
+
+// ─── Memory messages ────────────────────────────────
+
+message MemoryEntry {
+  string id = 1;
+  AgentRole agent_role = 2;
+  MemoryType type = 3;
+  string content = 4;
+  string context = 5;
+  repeated string tags = 6;
+  int64 timestamp = 7;
+  optional double relevance_score = 8;
+}
+
+// ─── Cost messages ──────────────────────────────────
+
+message CostBreakdown {
+  double total_cost_usd = 1;
+  map<string, double> by_agent = 2;
+}
+
+// ─── Task queue counts ──────────────────────────────
+
+message TaskCounts {
+  int32 pending = 1;
+  int32 active = 2;
+  int32 completed = 3;
+  int32 failed = 4;
+  int32 total = 5;
+}
+
+// ─── Orchestrator config ────────────────────────────
+
+message OrchestratorConfig {
+  optional string model = 1;
+  optional string cwd = 2;
+  repeated string allowed_tools = 3;
+  optional string permission_mode = 4;
+  optional int32 max_concurrent_broomsticks = 5;
+  optional double max_budget_usd = 6;
+  map<string, string> env = 7;
+  optional string memory_dir = 8;
+  // Keys are role name strings: "mickey", "yen-sid", etc.
+  map<string, string> model_overrides = 9;
+  map<string, bool> enabled_agents = 10;
+}
+
+// ─── Event messages (one per FantasiaEvent variant) ─
+
+message AgentSpawnedEvent {
+  AgentInstance agent = 1;
+}
+
+message AgentStatusChangedEvent {
+  string agent_id = 1;
+  AgentStatus old_status = 2;
+  AgentStatus new_status = 3;
+}
+
+message AgentTerminatedEvent {
+  string agent_id = 1;
+  optional string reason = 2;
+}
+
+message AgentMessageEvent {
+  string agent_id = 1;
+  string content = 2;
+  bool is_partial = 3;
+}
+
+message TaskCreatedEvent {
+  Task task = 1;
+}
+
+message TaskStatusChangedEvent {
+  string task_id = 1;
+  TaskStatus old_status = 2;
+  TaskStatus new_status = 3;
+}
+
+message TaskCompletedEvent {
+  string task_id = 1;
+  TaskResult result = 2;
+}
+
+message TaskFailedEvent {
+  string task_id = 1;
+  string error = 2;
+}
+
+message OrchestratorReadyEvent {}
+
+message OrchestratorErrorEvent {
+  string error_message = 1;
+}
+
+message OrchestratorStoppedEvent {}
+
+message UserInputNeededEvent {
+  string prompt = 1;
+  optional string task_id = 2;
+}
+
+message CostUpdateEvent {
+  double total_cost_usd = 1;
+  map<string, double> breakdown = 2;
+}
+
+message SdkMessageEvent {
+  string agent_id = 1;
+  bytes sdk_message_json = 2;
+}
+
+// ─── Unified event wrapper ──────────────────────────
+
+message FantasiaEvent {
+  int64 timestamp = 1;
+  uint64 sequence = 2;
+
+  oneof payload {
+    AgentSpawnedEvent agent_spawned = 10;
+    AgentStatusChangedEvent agent_status_changed = 11;
+    AgentTerminatedEvent agent_terminated = 12;
+    AgentMessageEvent agent_message = 13;
+    TaskCreatedEvent task_created = 20;
+    TaskStatusChangedEvent task_status_changed = 21;
+    TaskCompletedEvent task_completed = 22;
+    TaskFailedEvent task_failed = 23;
+    OrchestratorReadyEvent orchestrator_ready = 30;
+    OrchestratorErrorEvent orchestrator_error = 31;
+    OrchestratorStoppedEvent orchestrator_stopped = 32;
+    UserInputNeededEvent user_input_needed = 33;
+    CostUpdateEvent cost_update = 40;
+    SdkMessageEvent sdk_message = 41;
+  }
+}
