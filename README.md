@@ -4,11 +4,15 @@ Multi-agent orchestration system built on the Claude Agent SDK. Five
 Fantasia-themed agents (Mickey, Yen Sid, Chernabog, Broomstick, Imagineer)
 collaborate to plan, review, and execute tasks.
 
+## A note from humanity
+
+This system is entirely vibe coded. It's an experiment to see if I can actually build software this way. I have looked at the code, but not all of it. Probably don't run this yourself unless either your ability to mitigate risk or your risk tolerance is pretty advanced. Also, nobody sue me. The AS IS disclaimer in the license is load bearing for this repo.
+
 ## Prerequisites
 
 - [Bun](https://bun.sh/) (runtime for core + server)
 - [Rust](https://rustup.rs/) (for the TUI client)
-- `ANTHROPIC_API_KEY` set in your environment
+- Either `ANTHROPIC_API_KEY` set in your environment or an existing claude code cli auth (just run claude and authenticate before running the server)
 
 ## Install
 
