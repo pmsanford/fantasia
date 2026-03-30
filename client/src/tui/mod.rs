@@ -154,10 +154,15 @@ fn handle_key(key: KeyEvent, state: &mut AppState) -> Option<AppAction> {
         KeyCode::Home => state.cursor_position = 0,
         KeyCode::End => state.cursor_position = state.input_buffer.len(),
 
+        // Tab switching
+        KeyCode::Tab if !shift => state.next_tab(),
+        KeyCode::BackTab => state.prev_tab(),
+
         // Chat scrolling
-        KeyCode::PageUp => state.scroll_offset += 5,
+        KeyCode::PageUp => *state.scroll_offset_mut() += 5,
         KeyCode::PageDown => {
-            state.scroll_offset = state.scroll_offset.saturating_sub(5);
+            let v = state.scroll_offset_mut();
+            *v = v.saturating_sub(5);
         }
 
         _ => {}
@@ -169,10 +174,12 @@ fn handle_key(key: KeyEvent, state: &mut AppState) -> Option<AppAction> {
 fn handle_mouse(mouse: MouseEvent, state: &mut AppState) {
     match mouse.kind {
         MouseEventKind::ScrollUp => {
-            state.scroll_offset = state.scroll_offset.saturating_add(3);
+            let v = state.scroll_offset_mut();
+            *v = v.saturating_add(3);
         }
         MouseEventKind::ScrollDown => {
-            state.scroll_offset = state.scroll_offset.saturating_sub(3);
+            let v = state.scroll_offset_mut();
+            *v = v.saturating_sub(3);
         }
         _ => {}
     }

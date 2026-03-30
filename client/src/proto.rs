@@ -11,6 +11,7 @@ pub enum AgentRole {
     Chernabog = 3,
     Broomstick = 4,
     Imagineer = 5,
+    Jacchus = 6,
 }
 
 impl AgentRole {
@@ -22,6 +23,7 @@ impl AgentRole {
             AgentRole::Chernabog => "Chernabog",
             AgentRole::Broomstick => "Broomstick",
             AgentRole::Imagineer => "Imagineer",
+            AgentRole::Jacchus => "Jacchus",
         }
     }
 }

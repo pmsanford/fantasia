@@ -5,13 +5,18 @@ import type {
   TaskPlan,
   TaskReview,
   TaskResult,
+  ReconReport,
   AgentRole,
   AgentMessage,
   SDKUserMessage,
+  FantasiaEvent,
+  FantasiaEventType,
 } from './types.js';
 import { FantasiaEventEmitter } from './events/event-emitter.js';
 import { MessageBus } from './messaging/message-bus.js';
 import { TaskQueue } from './task/task-queue.js';
+import { NotificationBus } from './notifications/notification-bus.js';
+import type { NotificationBatch } from './notifications/notification-bus.js';
 import { ContextStore } from './context/context-store.js';
 import { MemoryStore } from './memory/memory-store.js';
 import { MemoryManager } from './memory/memory-manager.js';
@@ -21,8 +26,11 @@ import { YenSidAgent } from './agents/yen-sid.js';
 import { ChernabogAgent } from './agents/chernabog.js';
 import { BroomstickAgent } from './agents/broomstick.js';
 import { ImagineerAgent } from './agents/imagineer.js';
+import { JacchusAgent } from './agents/jacchus.js';
 import type { HealthReport } from './agents/imagineer.js';
 import { createFantasiaTools } from './tools/fantasia-tools.js';
+import { createMilestoneTools } from './tools/milestone-tools.js';
+import { MilestoneTracker } from './milestones/milestone-tracker.js';
 import { createTask, transitionTask, setPlan, setReview, completeTask } from './task/task.js';
 import { OrchestratorError, BudgetExceededError } from './errors.js';
 import type { BaseAgent } from './agents/base-agent.js';
@@ -165,10 +173,33 @@ export class Orchestrator {
     this.checkBudget();
     log.trace('Submit: budget check passed');
 
-    // Create Mickey's MCP tools
+    // Set up notification bus for this submit session
+    const notificationBus = new NotificationBus(this.events);
+    notificationBus.start();
+
+    const queueNotification = (batch: NotificationBatch) => {
+      const message = formatNotificationBatch(batch);
+      if (message && this.mickey) {
+        this.mickey.sendNotification(message).catch((err) => {
+          log.warn('Submit: failed to deliver notification to Mickey', { error: String(err) });
+        });
+      }
+    };
+
+    // Create Mickey's MCP tools with event subscription support
     const fantasiaTools = createFantasiaTools(this.sdk, {
       taskQueue: this.taskQueue,
-      onDelegateTask: (description, priority) => this.handleDelegateTask(description, priority as any),
+      onDelegateTask: (description, priority, simple) => this.handleDelegateTask(description, priority as any, simple),
+      onSubscribeEvents: (eventTypes: string[]) => {
+        return notificationBus.subscribe(
+          this.mickey!.instance.id,
+          eventTypes as FantasiaEventType[],
+          queueNotification,
+        );
+      },
+      onUnsubscribeEvents: (subscriptionId: string) => {
+        return notificationBus.unsubscribe(subscriptionId);
+      },
     });
     log.trace('Submit: MCP tools created');
 
@@ -182,6 +213,9 @@ export class Orchestrator {
         allowedTools: [...fantasiaTools.toolNames, ...(this.config.allowedTools ?? [])],
       },
     });
+
+    // Clean up notification bus
+    notificationBus.stop();
 
     this.context.addCost(this.mickey.instance.id, result.costUsd);
     this.emitCostUpdate();
@@ -218,9 +252,10 @@ export class Orchestrator {
 
   /**
    * Handle a delegate_task call from Mickey.
-   * Kicks off the Yen Sid -> Chernabog -> Broomstick pipeline.
+   * Simple tasks go directly to a Broomstick.
+   * Complex tasks go through the full Yen Sid -> Chernabog -> Broomstick pipeline.
    */
-  private async handleDelegateTask(description: string, priority: 'critical' | 'high' | 'normal' | 'low'): Promise<string> {
+  private async handleDelegateTask(description: string, priority: 'critical' | 'high' | 'normal' | 'low', simple: boolean): Promise<string> {
     const task = createTask({
       id: crypto.randomUUID(),
       description,
@@ -229,16 +264,65 @@ export class Orchestrator {
     });
     this.taskQueue.add(task);
     this.events.emit({ type: 'task:created', task });
-    log.info('Task delegated', { taskId: task.id, priority, descriptionLength: description.length });
+    log.info('Task delegated', { taskId: task.id, priority, simple, descriptionLength: description.length });
     log.debug('Task delegated details', { taskId: task.id, description });
 
-    // Run the pipeline asynchronously so Mickey isn't blocked
-    this.runTaskPipeline(task.id).catch((error) => {
+    // Run the appropriate pipeline asynchronously so Mickey isn't blocked
+    const pipeline = simple
+      ? this.runSimpleTaskPipeline(task.id)
+      : this.runTaskPipeline(task.id);
+
+    pipeline.catch((error) => {
       log.error('Task pipeline failed with unhandled error', { taskId: task.id, error: String(error) });
       this.events.emit({ type: 'orchestrator:error', error: error as Error });
     });
 
     return task.id;
+  }
+
+  /**
+   * Simple task pipeline: direct to a single Broomstick, no planning or review.
+   */
+  private async runSimpleTaskPipeline(taskId: string): Promise<void> {
+    let task = this.taskQueue.get(taskId);
+    if (!task) {
+      log.warn('runSimpleTaskPipeline: task not found', { taskId });
+      return;
+    }
+
+    log.info('Simple pipeline: starting', { taskId, description: task.description.slice(0, 100) });
+
+    try {
+      task = transitionTask(task, 'in-progress');
+      this.taskQueue.update(task);
+      this.emitTaskStatusChange(task, 'pending');
+
+      const result = await this.executePlan(task);
+      task = completeTask(task, result);
+      this.taskQueue.update(task);
+
+      if (result.success) {
+        this.events.emit({ type: 'task:completed', taskId: task.id, result });
+        log.info('Simple pipeline: completed successfully', { taskId });
+      } else {
+        this.events.emit({ type: 'task:failed', taskId: task.id, error: result.output });
+        log.warn('Simple pipeline: failed', { taskId, error: result.output.slice(0, 200) });
+      }
+    } catch (error) {
+      task = this.taskQueue.get(taskId) ?? task;
+      const result: TaskResult = {
+        success: false,
+        output: `Pipeline error: ${error}`,
+      };
+      try {
+        task = completeTask(task, result);
+      } catch {
+        task = { ...task, status: 'failed', result, updatedAt: Date.now() };
+      }
+      this.taskQueue.update(task);
+      this.events.emit({ type: 'task:failed', taskId: task.id, error: String(error) });
+      log.error('Simple pipeline: unhandled error', { taskId, error: String(error) });
+    }
   }
 
   /**
@@ -267,51 +351,83 @@ export class Orchestrator {
         taskId,
         summary: plan.summary.slice(0, 100),
         stepsCount: plan.steps.length,
-        subtasksCount: plan.subtasks?.length ?? 0,
+        workstreamCount: plan.workstreams?.length ?? 0,
+        hasContext: !!plan.context,
         complexity: plan.estimatedComplexity,
       });
 
-      // Phase 2: Review (Chernabog) with iteration
-      log.info('Pipeline: phase 2 - reviewing', { taskId });
+      // Phase 2: Review (Chernabog) + Recon (Jacchus) in parallel
+      log.info('Pipeline: phase 2 - reviewing + recon', { taskId });
       task = transitionTask(task, 'reviewing');
       this.taskQueue.update(task);
       this.emitTaskStatusChange(task, 'planning');
 
-      for (let iteration = 0; iteration < MAX_PLAN_REVIEW_ITERATIONS; iteration++) {
-        log.info('Pipeline: requesting review', { taskId, iteration });
-        const review = await this.requestReview(task);
-        task = setReview(task, { ...review, iteration });
+      let planWasRevised = false;
+
+      // Launch recon in parallel with review (non-fatal if it fails)
+      const reconPromise = this.requestRecon(task).catch((err) => {
+        log.warn('Pipeline: recon failed, proceeding without', { taskId, error: String(err) });
+        return null;
+      });
+
+      // Review loop
+      const reviewPromise = (async () => {
+        for (let iteration = 0; iteration < MAX_PLAN_REVIEW_ITERATIONS; iteration++) {
+          log.info('Pipeline: requesting review', { taskId, iteration });
+          const review = await this.requestReview(task);
+          task = setReview(task, { ...review, iteration });
+          this.taskQueue.update(task);
+
+          log.info('Pipeline: review result', {
+            taskId,
+            iteration,
+            approved: review.approved,
+            concernsCount: review.concerns.length,
+            requiredChangesCount: review.requiredChanges.length,
+          });
+
+          if (review.approved) {
+            log.info('Pipeline: plan approved', { taskId, iteration });
+            break;
+          }
+
+          // If not approved and not at max iterations, revise the plan
+          if (iteration < MAX_PLAN_REVIEW_ITERATIONS - 1) {
+            log.info('Pipeline: revising plan', { taskId, iteration, concerns: review.concerns });
+            task = transitionTask(task, 'planning');
+            this.taskQueue.update(task);
+            this.emitTaskStatusChange(task, 'reviewing');
+
+            plan = await this.revisePlan(task, review);
+            task = setPlan(task, plan);
+            task = transitionTask(task, 'reviewing');
+            this.taskQueue.update(task);
+            this.emitTaskStatusChange(task, 'planning');
+            planWasRevised = true;
+            log.info('Pipeline: plan revised', { taskId, summary: plan.summary.slice(0, 100) });
+          } else {
+            log.warn('Pipeline: max review iterations reached, proceeding with unapproved plan', { taskId });
+          }
+        }
+      })();
+
+      // Wait for both review and recon to complete
+      const [reconResult] = await Promise.all([reconPromise, reviewPromise]);
+
+      // Attach recon to task
+      if (reconResult) {
+        if (planWasRevised) {
+          reconResult.potentiallyStale = true;
+          log.info('Pipeline: recon marked as potentially stale (plan was revised)', { taskId });
+        }
+        task = { ...task, recon: reconResult, updatedAt: Date.now() };
         this.taskQueue.update(task);
-
-        log.info('Pipeline: review result', {
+        log.info('Pipeline: recon attached', {
           taskId,
-          iteration,
-          approved: review.approved,
-          concernsCount: review.concerns.length,
-          requiredChangesCount: review.requiredChanges.length,
+          commonFiles: reconResult.sharedContext.commonFiles.length,
+          subtaskRecon: reconResult.subtaskRecon.length,
+          potentiallyStale: reconResult.potentiallyStale,
         });
-
-        if (review.approved) {
-          log.info('Pipeline: plan approved', { taskId, iteration });
-          break;
-        }
-
-        // If not approved and not at max iterations, revise the plan
-        if (iteration < MAX_PLAN_REVIEW_ITERATIONS - 1) {
-          log.info('Pipeline: revising plan', { taskId, iteration, concerns: review.concerns });
-          task = transitionTask(task, 'planning');
-          this.taskQueue.update(task);
-          this.emitTaskStatusChange(task, 'reviewing');
-
-          plan = await this.revisePlan(task, review);
-          task = setPlan(task, plan);
-          task = transitionTask(task, 'reviewing');
-          this.taskQueue.update(task);
-          this.emitTaskStatusChange(task, 'planning');
-          log.info('Pipeline: plan revised', { taskId, summary: plan.summary.slice(0, 100) });
-        } else {
-          log.warn('Pipeline: max review iterations reached, proceeding with unapproved plan', { taskId });
-        }
       }
 
       // Phase 3: Execution (Broomsticks)
@@ -388,7 +504,8 @@ export class Orchestrator {
         'Return a JSON object with these fields:',
         '- summary: string (brief summary of the approach)',
         '- steps: string[] (ordered implementation steps)',
-        '- subtasks: Array<{description: string, dependencies?: string[]}> (discrete work units that can be assigned to workers)',
+        '- context: string (key findings for workers: architectural decisions, important file paths, patterns to follow, gotchas — concise but enough to avoid redundant exploration)',
+        '- workstreams: Array<{name: string, description: string, dependencies?: string[], emits?: Array<{id: string, description: string}>, waitsFor?: Array<{id: string, description: string}>}> (coherent streams of related work, each handled by one worker agent. Group tightly-coupled changes together. Use emits/waitsFor for fine-grained milestone dependencies when one workstream produces an artifact another needs mid-execution — e.g. emits: [{id: "api-types-defined", description: "After writing type definitions to src/types/api.ts"}]. Milestone IDs must be short kebab-case strings. Only use milestones for true data dependencies, not ordering preference.)',
         '- risks: string[] (potential issues)',
         '- estimatedComplexity: "trivial" | "simple" | "moderate" | "complex"',
       ].join('\n');
@@ -440,7 +557,7 @@ export class Orchestrator {
         `Concerns: ${review.concerns.join('; ')}`,
         `Required Changes: ${review.requiredChanges.join('; ')}`,
         '',
-        'Address all concerns and required changes. Return a revised JSON plan with the same schema.',
+        'Address all concerns and required changes. Return a revised JSON plan with the same schema (summary, steps, context, workstreams with optional emits/waitsFor milestone arrays, risks, estimatedComplexity).',
       ].join('\n');
 
       log.debug('revisePlan: running Yen Sid', { taskId: task.id });
@@ -520,6 +637,83 @@ export class Orchestrator {
   }
 
   /**
+   * Request codebase reconnaissance from Jacchus, running in parallel with review.
+   */
+  private async requestRecon(task: Task): Promise<ReconReport> {
+    this.checkBudget();
+
+    const jacchus = new JacchusAgent(this.sdk, this.events, this.memory, {
+      model: this.config.modelOverrides.jacchus ?? 'claude-sonnet-4-6',
+    });
+    this.activeAgents.set(jacchus.instance.id, jacchus);
+    this.events.emit({ type: 'agent:spawned', agent: jacchus.instance });
+    log.info('requestRecon: Jacchus spawned', { agentId: jacchus.instance.id, taskId: task.id });
+
+    try {
+      const plan = task.plan!;
+      const prompt = [
+        `Explore the codebase and gather reconnaissance for the following task and plan:`,
+        '',
+        `## Task`,
+        task.description,
+        '',
+        `## Plan Summary`,
+        plan.summary,
+        '',
+        `## Plan Steps`,
+        plan.steps.map((s, i) => `${i + 1}. ${s}`).join('\n'),
+        '',
+        `## Workstreams to Scout For`,
+        ...(plan.workstreams ?? []).map((ws, i) =>
+          `${i + 1}. **${ws.name}**: ${ws.description}${ws.dependencies?.length ? ` (depends on: ${ws.dependencies.join(', ')})` : ''}`
+        ),
+        '',
+        'Return a JSON recon report with sharedContext and subtaskRecon arrays.',
+      ].join('\n');
+
+      log.debug('requestRecon: running Jacchus', { taskId: task.id });
+      const result = await jacchus.run({ prompt, cwd: this.config.cwd, env: this.config.env });
+      this.context.addCost(jacchus.instance.id, result.costUsd);
+      this.emitCostUpdate();
+
+      log.info('requestRecon: Jacchus completed', {
+        taskId: task.id,
+        agentId: jacchus.instance.id,
+        success: result.success,
+        costUsd: result.costUsd,
+        durationMs: result.durationMs,
+      });
+
+      return this.parseReconReport(result.output);
+    } finally {
+      await jacchus.stop();
+      this.activeAgents.delete(jacchus.instance.id);
+      log.debug('requestRecon: Jacchus stopped', { agentId: jacchus.instance.id });
+    }
+  }
+
+  private parseReconReport(output: string): ReconReport {
+    try {
+      const jsonMatch = output.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          sharedContext: parsed.sharedContext ?? { commonFiles: [], patterns: [], constraints: [] },
+          subtaskRecon: parsed.subtaskRecon ?? [],
+          potentiallyStale: false,
+        };
+      }
+    } catch {
+      log.warn('parseReconReport: failed to parse JSON, returning empty report');
+    }
+    return {
+      sharedContext: { commonFiles: [], patterns: [], constraints: [] },
+      subtaskRecon: [],
+      potentiallyStale: false,
+    };
+  }
+
+  /**
    * Execute the plan using Broomstick workers.
    */
   private async executePlan(task: Task): Promise<TaskResult> {
@@ -531,18 +725,18 @@ export class Orchestrator {
       return { success: false, output: 'No plan available' };
     }
 
-    // If the plan has subtasks, run them (potentially in parallel)
-    if (plan.subtasks && plan.subtasks.length > 1) {
-      log.info('executePlan: running parallel subtasks', { taskId: task.id, subtaskCount: plan.subtasks.length });
-      return this.executeSubtasks(task, plan);
+    // If the plan has multiple workstreams, run them in parallel
+    if (plan.workstreams && plan.workstreams.length > 1) {
+      log.info('executePlan: running parallel workstreams', { taskId: task.id, workstreamCount: plan.workstreams.length });
+      return this.executeWorkstreams(task, plan);
     }
 
-    // Single broomstick for simple plans
+    // Single broomstick for simple plans or single workstream
     log.info('executePlan: running single broomstick', { taskId: task.id });
-    const planExcerpt = plan.steps.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    const planExcerpt = this.formatPlanExcerpt(plan);
     const broomstick = new BroomstickAgent(
       this.sdk, this.events, this.memory,
-      task.description, planExcerpt,
+      task.description, planExcerpt, task.recon,
       { model: this.config.modelOverrides.broomstick ?? this.config.model },
     );
     this.activeAgents.set(broomstick.instance.id, broomstick);
@@ -580,54 +774,112 @@ export class Orchestrator {
   }
 
   /**
-   * Execute multiple subtasks, respecting dependencies and concurrency limits.
+   * Format plan steps and context into an excerpt for broomstick prompts.
    */
-  private async executeSubtasks(task: Task, plan: TaskPlan): Promise<TaskResult> {
-    const subtasks = plan.subtasks!;
+  private formatPlanExcerpt(plan: TaskPlan): string {
+    const parts: string[] = [];
+    if (plan.context) {
+      parts.push('## Context from Architect', plan.context, '');
+    }
+    if (plan.steps.length > 0) {
+      parts.push('## Steps');
+      parts.push(plan.steps.map((s, i) => `${i + 1}. ${s}`).join('\n'));
+    }
+    return parts.join('\n');
+  }
+
+  /**
+   * Execute workstreams in parallel, one broomstick per workstream.
+   */
+  private async executeWorkstreams(task: Task, plan: TaskPlan): Promise<TaskResult> {
+    const workstreams = plan.workstreams!;
     const results: TaskResult[] = [];
     let allSuccess = true;
 
-    log.info('executeSubtasks: starting', { taskId: task.id, subtaskCount: subtasks.length });
+    log.info('executeWorkstreams: starting', { taskId: task.id, workstreamCount: workstreams.length });
 
-    // Simple approach: run subtasks without explicit dependencies in parallel,
-    // sequential subtasks (those with deps) run after their deps complete
-    // For now, run them all in parallel up to concurrency limit
-    const promises = subtasks.map(async (subtask, index) => {
+    const planExcerpt = this.formatPlanExcerpt(plan);
+
+    // Shared milestone tracker for coordinating workstreams within this task
+    const hasMilestones = workstreams.some(ws => ws.emits?.length || ws.waitsFor?.length);
+    const milestoneTracker = hasMilestones ? new MilestoneTracker(this.events) : null;
+    if (milestoneTracker) {
+      log.info('executeWorkstreams: milestone coordination enabled', { taskId: task.id });
+    }
+
+    const promises = workstreams.map(async (workstream, index) => {
       this.checkBudget();
 
-      const stepsPart = plan.steps.length > 0
-        ? `\nOverall plan context:\n${plan.steps.map((s, i) => `${i + 1}. ${s}`).join('\n')}`
-        : '';
+      // Find matching workstream recon by name or description
+      const wsRecon = task.recon?.subtaskRecon?.find(
+        r => r.subtaskDescription === workstream.name || r.subtaskDescription === workstream.description
+      );
+      const reconForBroomstick: ReconReport | undefined = task.recon ? {
+        ...task.recon,
+        subtaskRecon: wsRecon ? [wsRecon] : [],
+      } : undefined;
+
+      const wsMilestones = (workstream.emits?.length || workstream.waitsFor?.length)
+        ? { emits: workstream.emits, waitsFor: workstream.waitsFor }
+        : undefined;
 
       const broomstick = new BroomstickAgent(
         this.sdk, this.events, this.memory,
-        subtask.description,
-        stepsPart,
+        workstream.description,
+        planExcerpt,
+        reconForBroomstick,
         { model: this.config.modelOverrides.broomstick ?? this.config.model },
+        wsMilestones,
       );
       this.activeAgents.set(broomstick.instance.id, broomstick);
       broomstick.instance.currentTaskId = task.id;
       this.events.emit({ type: 'agent:spawned', agent: broomstick.instance });
-      log.info('executeSubtasks: Broomstick spawned for subtask', {
+      log.info('executeWorkstreams: Broomstick spawned for workstream', {
         agentId: broomstick.instance.id,
         taskId: task.id,
-        subtaskIndex: index,
-        subtaskDescription: subtask.description.slice(0, 100),
+        workstreamIndex: index,
+        workstreamName: workstream.name,
+        emits: workstream.emits?.map(m => m.id),
+        waitsFor: workstream.waitsFor?.map(m => m.id),
       });
 
+      // Build run options, attaching milestone MCP tools if needed
+      const runOptions: Parameters<typeof broomstick.run>[0] = {
+        prompt: workstream.description,
+        cwd: this.config.cwd,
+        env: this.config.env,
+      };
+      if (wsMilestones && milestoneTracker) {
+        const { server: milestoneServer } = createMilestoneTools(this.sdk, milestoneTracker, workstream.name);
+        runOptions.extraSdkOptions = {
+          mcpServers: { milestones: milestoneServer },
+        };
+      }
+
       try {
-        const result = await broomstick.run({
-          prompt: subtask.description,
-          cwd: this.config.cwd,
-          env: this.config.env,
-        });
+        const result = await broomstick.run(runOptions);
         this.context.addCost(broomstick.instance.id, result.costUsd);
         this.emitCostUpdate();
 
-        log.info('executeSubtasks: Broomstick completed subtask', {
+        // Auto-emit any milestones this workstream declared but forgot to emit,
+        // so dependent workstreams aren't left waiting after a successful completion.
+        if (milestoneTracker && result.success && workstream.emits) {
+          for (const m of workstream.emits) {
+            if (!milestoneTracker.getReached().includes(m.id)) {
+              log.warn('executeWorkstreams: auto-emitting forgotten milestone', {
+                milestoneId: m.id,
+                workstreamName: workstream.name,
+              });
+              milestoneTracker.emit(m.id, workstream.name);
+            }
+          }
+        }
+
+        log.info('executeWorkstreams: Broomstick completed workstream', {
           agentId: broomstick.instance.id,
           taskId: task.id,
-          subtaskIndex: index,
+          workstreamIndex: index,
+          workstreamName: workstream.name,
           success: result.success,
           costUsd: result.costUsd,
           durationMs: result.durationMs,
@@ -642,10 +894,11 @@ export class Orchestrator {
         if (!result.success) allSuccess = false;
         results.push(taskResult);
       } catch (error) {
-        log.error('executeSubtasks: Broomstick failed', {
+        log.error('executeWorkstreams: Broomstick failed', {
           agentId: broomstick.instance.id,
           taskId: task.id,
-          subtaskIndex: index,
+          workstreamIndex: index,
+          workstreamName: workstream.name,
           error: String(error),
         });
         allSuccess = false;
@@ -657,19 +910,20 @@ export class Orchestrator {
     });
 
     await Promise.all(promises);
+    milestoneTracker?.dispose();
 
     const totalCost = results.reduce((sum, r) => sum + (r.costUsd ?? 0), 0);
     const totalDuration = results.reduce((sum, r) => sum + (r.durationMs ?? 0), 0);
-    const combinedOutput = results
-      .map((r, i) => `[Subtask ${i + 1}] ${r.success ? 'SUCCESS' : 'FAILED'}: ${r.output}`)
+    const combinedOutput = workstreams
+      .map((ws, i) => `[${ws.name}] ${results[i]?.success ? 'SUCCESS' : 'FAILED'}: ${results[i]?.output ?? 'No result'}`)
       .join('\n\n');
 
-    log.info('executeSubtasks: all done', {
+    log.info('executeWorkstreams: all done', {
       taskId: task.id,
       allSuccess,
       totalCost,
       totalDuration,
-      subtaskResults: results.length,
+      workstreamResults: results.length,
     });
 
     return {
@@ -767,7 +1021,8 @@ export class Orchestrator {
         return {
           summary: parsed.summary ?? 'No summary provided',
           steps: parsed.steps ?? [],
-          subtasks: parsed.subtasks,
+          context: parsed.context,
+          workstreams: parsed.workstreams,
           risks: parsed.risks,
           estimatedComplexity: parsed.estimatedComplexity ?? 'moderate',
         };
@@ -818,4 +1073,62 @@ export class Orchestrator {
     const keywords = ['auth', 'api', 'database', 'test', 'ui', 'deploy', 'security', 'performance', 'refactor', 'bug', 'feature'];
     return keywords.filter((kw) => words.some((w) => w.includes(kw)));
   }
+}
+
+// ─── Notification Formatting ─────────────────────────────────────
+
+function formatNotificationBatch(batch: NotificationBatch): string | null {
+  if (batch.events.length === 0) return null;
+
+  const lines: string[] = ['[System Notification] The following events occurred:'];
+
+  for (const event of batch.events) {
+    switch (event.type) {
+      case 'task:completed': {
+        const e = event as Extract<FantasiaEvent, { type: 'task:completed' }>;
+        lines.push(`- Task ${e.taskId.slice(0, 8)} completed successfully.`);
+        if (e.result.output) {
+          lines.push(`  Result: ${e.result.output.slice(0, 300)}`);
+        }
+        break;
+      }
+      case 'task:failed': {
+        const e = event as Extract<FantasiaEvent, { type: 'task:failed' }>;
+        lines.push(`- Task ${e.taskId.slice(0, 8)} failed: ${e.error.slice(0, 200)}`);
+        break;
+      }
+      case 'task:status-changed': {
+        const e = event as Extract<FantasiaEvent, { type: 'task:status-changed' }>;
+        lines.push(`- Task ${e.taskId.slice(0, 8)}: ${e.oldStatus} → ${e.newStatus}`);
+        break;
+      }
+      case 'task:created': {
+        const e = event as Extract<FantasiaEvent, { type: 'task:created' }>;
+        lines.push(`- New task created: ${e.task.description.slice(0, 100)}`);
+        break;
+      }
+      case 'agent:spawned': {
+        const e = event as Extract<FantasiaEvent, { type: 'agent:spawned' }>;
+        lines.push(`- Agent spawned: ${e.agent.config.name} (${e.agent.config.role})`);
+        break;
+      }
+      case 'agent:terminated': {
+        const e = event as Extract<FantasiaEvent, { type: 'agent:terminated' }>;
+        lines.push(`- Agent ${e.agentId.slice(0, 8)} terminated${e.reason ? `: ${e.reason}` : ''}`);
+        break;
+      }
+      case 'cost:update': {
+        const e = event as Extract<FantasiaEvent, { type: 'cost:update' }>;
+        lines.push(`- Cost update: $${e.totalCostUsd.toFixed(4)}`);
+        break;
+      }
+      default:
+        lines.push(`- ${event.type}`);
+    }
+  }
+
+  lines.push('');
+  lines.push('Use get_task_result to retrieve full results for completed tasks. You do NOT need to poll — you will continue receiving notifications for events you subscribed to.');
+
+  return lines.join('\n');
 }

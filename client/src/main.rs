@@ -84,16 +84,21 @@ async fn network_task(
             Some(action) = action_rx.recv() => {
                 match action {
                     AppAction::Submit(msg) => {
-                        match rpc::orchestrator::submit(SOCKET_PATH, msg).await {
-                            Ok(_) => {
-                                let _ = event_tx.send(AppEvent::SubmitDone).await;
+                        // Spawn submit in a separate task so it doesn't block
+                        // event forwarding while waiting for Mickey to respond.
+                        let tx = event_tx.clone();
+                        tokio::spawn(async move {
+                            match rpc::orchestrator::submit(SOCKET_PATH, msg).await {
+                                Ok(_) => {
+                                    let _ = tx.send(AppEvent::SubmitDone).await;
+                                }
+                                Err(e) => {
+                                    let _ = tx
+                                        .send(AppEvent::NetworkError(format!("Submit failed: {}", e)))
+                                        .await;
+                                }
                             }
-                            Err(e) => {
-                                let _ = event_tx
-                                    .send(AppEvent::NetworkError(format!("Submit failed: {}", e)))
-                                    .await;
-                            }
-                        }
+                        });
                     }
                     AppAction::Quit => break,
                 }

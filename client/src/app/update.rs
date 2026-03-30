@@ -79,7 +79,7 @@ pub fn update(state: &mut AppState, event: AppEvent) {
                         state.push_message(MessageRole::Agent(agent_name), content);
                     }
                 }
-                state.scroll_offset = 0;
+                *state.scroll_offset_mut() = 0;
             }
 
             Some(fantasia_event::Payload::AgentStatusChanged(ev)) => {

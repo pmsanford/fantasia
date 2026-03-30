@@ -70,6 +70,7 @@ const ROLE_TO_PROTO: Record<CoreAgentRole, AgentRole> = {
   'chernabog': AgentRole.CHERNABOG,
   'broomstick': AgentRole.BROOMSTICK,
   'imagineer': AgentRole.IMAGINEER,
+  'jacchus': AgentRole.JACCHUS,
 };
 
 const PROTO_TO_ROLE: Record<number, CoreAgentRole> = {
@@ -78,6 +79,7 @@ const PROTO_TO_ROLE: Record<number, CoreAgentRole> = {
   [AgentRole.CHERNABOG]: 'chernabog',
   [AgentRole.BROOMSTICK]: 'broomstick',
   [AgentRole.IMAGINEER]: 'imagineer',
+  [AgentRole.JACCHUS]: 'jacchus',
 };
 
 export function toProtoAgentRole(role: CoreAgentRole): AgentRole {

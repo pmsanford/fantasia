@@ -37,6 +37,35 @@ fn wrap_line_count(text: &str, width: usize) -> usize {
 
 use crate::proto::{AgentInstance, AgentRole, TaskCounts};
 
+/// Filter that determines which messages appear in a tab.
+#[derive(Debug, Clone)]
+pub enum TabFilter {
+    /// Show all messages.
+    All,
+    /// Show only messages from these agent names (plus User and System).
+    Agents(Vec<String>),
+}
+
+impl TabFilter {
+    pub fn matches(&self, role: &MessageRole) -> bool {
+        match self {
+            TabFilter::All => true,
+            TabFilter::Agents(names) => match role {
+                MessageRole::User | MessageRole::System => true,
+                MessageRole::Agent(name) => names.iter().any(|n| name.starts_with(n)),
+            },
+        }
+    }
+}
+
+/// A named tab with a message filter.
+#[derive(Debug, Clone)]
+pub struct ChatTab {
+    pub name: String,
+    pub filter: TabFilter,
+    pub scroll_offset: usize,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum MessageRole {
     User,
@@ -80,8 +109,10 @@ pub struct AppState {
     /// True while waiting for a Submit RPC to return.
     pub submitting: bool,
 
-    /// How many lines to scroll the chat area up from the bottom.
-    pub scroll_offset: usize,
+    /// Chat tabs with per-tab filters and scroll offsets.
+    pub tabs: Vec<ChatTab>,
+    /// Index of the currently active tab.
+    pub active_tab: usize,
 
     /// Ephemeral status/error message with expiry.
     pub status_line: Option<(String, Instant)>,
@@ -107,7 +138,19 @@ impl AppState {
             orchestrator_running: false,
             submitting: false,
             last_server_update: None,
-            scroll_offset: 0,
+            tabs: vec![
+                ChatTab {
+                    name: "Mickey".into(),
+                    filter: TabFilter::Agents(vec!["Mickey".into()]),
+                    scroll_offset: 0,
+                },
+                ChatTab {
+                    name: "All".into(),
+                    filter: TabFilter::All,
+                    scroll_offset: 0,
+                },
+            ],
+            active_tab: 0,
             status_line: None,
             blink_state: true,
             last_blink: Instant::now(),
@@ -209,9 +252,35 @@ impl AppState {
         std::mem::take(&mut self.input_buffer)
     }
 
-    /// Add a chat message and reset scroll to bottom.
+    /// Scroll offset for the active tab.
+    pub fn scroll_offset(&self) -> usize {
+        self.tabs[self.active_tab].scroll_offset
+    }
+
+    /// Mutable reference to scroll offset for the active tab.
+    pub fn scroll_offset_mut(&mut self) -> &mut usize {
+        &mut self.tabs[self.active_tab].scroll_offset
+    }
+
+    /// Switch to the next tab.
+    pub fn next_tab(&mut self) {
+        self.active_tab = (self.active_tab + 1) % self.tabs.len();
+    }
+
+    /// Switch to the previous tab.
+    pub fn prev_tab(&mut self) {
+        self.active_tab = if self.active_tab == 0 {
+            self.tabs.len() - 1
+        } else {
+            self.active_tab - 1
+        };
+    }
+
+    /// Add a chat message and reset scroll to bottom on all tabs.
     pub fn push_message(&mut self, role: MessageRole, content: String) {
         self.messages.push(ChatMessage { role, content });
-        self.scroll_offset = 0;
+        for tab in &mut self.tabs {
+            tab.scroll_offset = 0;
+        }
     }
 }

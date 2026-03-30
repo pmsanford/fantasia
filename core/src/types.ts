@@ -33,7 +33,7 @@ export type {
 
 // ─── Agent Types ────────────────────────────────────────────────
 
-export type AgentRole = 'mickey' | 'yen-sid' | 'chernabog' | 'broomstick' | 'imagineer';
+export type AgentRole = 'mickey' | 'yen-sid' | 'chernabog' | 'broomstick' | 'imagineer' | 'jacchus';
 
 export type AgentStatus = 'idle' | 'working' | 'waiting' | 'error' | 'terminated';
 
@@ -87,6 +87,7 @@ export interface Task {
   createdBy: string;
   plan?: TaskPlan;
   review?: TaskReview;
+  recon?: ReconReport;
   result?: TaskResult;
   subtaskIds: string[];
   createdAt: number;
@@ -97,9 +98,20 @@ export interface Task {
 export interface TaskPlan {
   summary: string;
   steps: string[];
-  subtasks?: Array<{
+  /** Key context for workers: architectural decisions, relevant file paths, patterns to follow. */
+  context?: string;
+  /** Workstreams group related tasks for a single broomstick. Each workstream runs in parallel. */
+  workstreams?: Array<{
+    /** Name of this workstream (e.g. "API layer", "Frontend components"). */
+    name: string;
+    /** Full description of all work this broomstick should do, in order. */
     description: string;
+    /** Other workstream names this depends on. */
     dependencies?: string[];
+    /** Milestones this workstream will emit upon completing specific sub-tasks. */
+    emits?: Array<{ id: string; description: string }>;
+    /** Milestones this workstream must wait for before proceeding with dependent sub-tasks. */
+    waitsFor?: Array<{ id: string; description: string }>;
   }>;
   risks?: string[];
   estimatedComplexity: 'trivial' | 'simple' | 'moderate' | 'complex';
@@ -111,6 +123,21 @@ export interface TaskReview {
   requiredChanges: string[];
   strengths: string[];
   iteration: number;
+}
+
+export interface ReconReport {
+  sharedContext: {
+    commonFiles: Array<{ path: string; purpose: string }>;
+    patterns: string[];
+    constraints: string[];
+  };
+  subtaskRecon: Array<{
+    subtaskDescription: string;
+    relevantFiles: Array<{ path: string; reason: string; keyLines?: string }>;
+    references: Array<{ path: string; description: string }>;
+    warnings: string[];
+  }>;
+  potentiallyStale: boolean;
 }
 
 export interface TaskResult {
@@ -165,7 +192,8 @@ export type FantasiaEvent =
   | { type: 'orchestrator:stopped' }
   | { type: 'user:input-needed'; prompt: string; taskId?: string }
   | { type: 'cost:update'; totalCostUsd: number; breakdown: Record<string, number> }
-  | { type: 'sdk:message'; agentId: string; sdkMessage: SDKMessage };
+  | { type: 'sdk:message'; agentId: string; sdkMessage: SDKMessage }
+  | { type: 'milestone:reached'; milestoneId: string; workstreamName: string };
 
 export type FantasiaEventType = FantasiaEvent['type'];
 

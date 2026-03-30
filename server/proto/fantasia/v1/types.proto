@@ -10,6 +10,7 @@ enum AgentRole {
   AGENT_ROLE_CHERNABOG = 3;
   AGENT_ROLE_BROOMSTICK = 4;
   AGENT_ROLE_IMAGINEER = 5;
+  AGENT_ROLE_JACCHUS = 6;
 }
 
 enum AgentStatus {

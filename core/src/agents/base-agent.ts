@@ -43,6 +43,7 @@ export abstract class BaseAgent {
   protected events: FantasiaEventEmitter;
   protected memory: MemoryManager;
   protected currentQuery: SDKQuery | null = null;
+  protected lastSessionId: string | null = null;
 
   constructor(
     sdk: SdkAdapter,
@@ -106,13 +107,14 @@ export abstract class BaseAgent {
       systemPrompt: { type: 'preset', preset: 'claude_code', append: systemPrompt },
       cwd: options.cwd,
       ...(options.env && Object.keys(options.env).length > 0 ? { env: options.env } : {}),
+      ...(this.lastSessionId ? { resume: this.lastSessionId } : {}),
       stderr: (data: string) => {
         agentLog.debug('run: stderr', { data: data.trim() });
       },
       ...options.extraSdkOptions,
     };
 
-    agentLog.debug('run: calling sdk.query', { model: config.model });
+    agentLog.debug('run: calling sdk.query', { model: config.model, resumeSession: this.lastSessionId ?? 'none' });
 
     try {
       const query = this.sdk.query({ prompt: options.prompt, options: sdkOptions });
@@ -183,6 +185,11 @@ export abstract class BaseAgent {
       this.currentQuery = null;
       this.setStatus('idle');
 
+      // Store session ID for resuming conversation on next run
+      if (sessionId) {
+        this.lastSessionId = sessionId;
+      }
+
       agentLog.info('run: completed', {
         id: this.instance.id,
         name: this.instance.config.name,
@@ -191,6 +198,7 @@ export abstract class BaseAgent {
         numTurns,
         durationMs,
         messageCount,
+        sessionId,
       });
 
       return { success, output, structuredOutput, costUsd, numTurns, durationMs, sessionId };
@@ -215,6 +223,32 @@ export abstract class BaseAgent {
         this.instance.id,
         this.instance.config.role,
       );
+    }
+  }
+
+  /**
+   * Send a notification message into the agent's active conversation.
+   * Uses streamInput to inject a user message without interrupting the session.
+   * Returns false if no active query.
+   */
+  async sendNotification(message: string): Promise<boolean> {
+    if (!this.currentQuery) return false;
+    try {
+      const userMessage: SDKUserMessage = {
+        type: 'user',
+        message: { role: 'user', content: message },
+        parent_tool_use_id: null,
+      };
+      // Create a one-shot async iterable
+      async function* singleMessage() {
+        yield userMessage;
+      }
+      await this.currentQuery.streamInput(singleMessage());
+      log.debug('Notification sent to agent', { id: this.instance.id, messageLength: message.length });
+      return true;
+    } catch (err) {
+      log.warn('Failed to send notification to agent', { id: this.instance.id, error: String(err) });
+      return false;
     }
   }
 

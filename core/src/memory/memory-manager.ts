@@ -148,7 +148,7 @@ export class MemoryManager {
   async prune(maxPerRole = 50): Promise<number> {
     log.info('Pruning memories', { maxPerRole });
     let pruned = 0;
-    const roles: AgentRole[] = ['mickey', 'yen-sid', 'chernabog', 'broomstick', 'imagineer'];
+    const roles: AgentRole[] = ['mickey', 'yen-sid', 'chernabog', 'broomstick', 'imagineer', 'jacchus'];
 
     for (const role of roles) {
       const memories = this.sortByRecency(this.store.getByRole(role));

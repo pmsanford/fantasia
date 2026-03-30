@@ -987,6 +987,11 @@ export enum AgentRole {
    * @generated from enum value: AGENT_ROLE_IMAGINEER = 5;
    */
   IMAGINEER = 5,
+
+  /**
+   * @generated from enum value: AGENT_ROLE_JACCHUS = 6;
+   */
+  JACCHUS = 6,
 }
 
 /**

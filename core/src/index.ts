@@ -15,9 +15,14 @@ export { YenSidAgent } from './agents/yen-sid.js';
 export { ChernabogAgent } from './agents/chernabog.js';
 export { BroomstickAgent } from './agents/broomstick.js';
 export { ImagineerAgent } from './agents/imagineer.js';
+export { JacchusAgent } from './agents/jacchus.js';
 
 // SDK adapter
 export { RealSdkAdapter } from './sdk/sdk-adapter.js';
+
+// Notifications
+export { NotificationBus } from './notifications/notification-bus.js';
+export type { NotificationSubscription, NotificationBatch } from './notifications/notification-bus.js';
 
 // Tools
 export { createFantasiaTools } from './tools/fantasia-tools.js';
@@ -43,6 +48,7 @@ export type {
   Task,
   TaskPlan,
   TaskReview,
+  ReconReport,
   TaskResult,
   MessageType,
   AgentMessage,
