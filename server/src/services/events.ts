@@ -3,7 +3,7 @@ import type { FantasiaEvent as CoreFantasiaEvent } from '@fantasia/core';
 import { EventService } from '../gen/fantasia/v1/events_pb.js';
 import type { FantasiaEvent as ProtoFantasiaEvent } from '../gen/fantasia/v1/types_pb.js';
 import { getOrchestrator, nextSequence } from '../bridge.js';
-import { toProtoFantasiaEvent } from '../convert.js';
+import { toProtoFantasiaEvent, toProtoFantasiaEvents } from '../convert.js';
 import { withErrorHandling } from '../errors.js';
 import logger from '../logger.js';
 
@@ -37,10 +37,12 @@ export const eventServiceImpl: ServiceImpl<typeof EventService> = {
       for (const coreEvent of history) {
         const seq = nextSequence();
         if (req.afterSequence != null && BigInt(seq) <= req.afterSequence) continue;
-        const protoEvent = toProtoFantasiaEvent(coreEvent, seq);
-        if (shouldInclude(protoEvent)) {
-          log.trace('Subscribe: yielding history event', { sequence: seq, payloadCase: getPayloadCase(protoEvent) });
-          yield protoEvent;
+        const protoEvents = toProtoFantasiaEvents(coreEvent, seq);
+        for (const protoEvent of protoEvents) {
+          if (shouldInclude(protoEvent)) {
+            log.trace('Subscribe: yielding history event', { sequence: seq, payloadCase: getPayloadCase(protoEvent) });
+            yield protoEvent;
+          }
         }
       }
     }
@@ -68,10 +70,12 @@ export const eventServiceImpl: ServiceImpl<typeof EventService> = {
         while (queue.length > 0) {
           const event = queue.shift()!;
           const seq = nextSequence();
-          const protoEvent = toProtoFantasiaEvent(event, seq);
-          if (shouldInclude(protoEvent)) {
-            log.trace('Subscribe: yielding live event', { sequence: seq, payloadCase: getPayloadCase(protoEvent) });
-            yield protoEvent;
+          const protoEvents = toProtoFantasiaEvents(event, seq);
+          for (const protoEvent of protoEvents) {
+            if (shouldInclude(protoEvent)) {
+              log.trace('Subscribe: yielding live event', { sequence: seq, payloadCase: getPayloadCase(protoEvent) });
+              yield protoEvent;
+            }
           }
         }
 
@@ -95,7 +99,7 @@ export const eventServiceImpl: ServiceImpl<typeof EventService> = {
       const history = orch.events.history(req.limit ?? undefined);
       log.debug('GetHistory response', { count: history.length });
       return {
-        events: history.map(e => toProtoFantasiaEvent(e, nextSequence())),
+        events: history.flatMap(e => toProtoFantasiaEvents(e, nextSequence())),
       };
     });
   },

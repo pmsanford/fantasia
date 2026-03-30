@@ -131,9 +131,33 @@ pub struct AgentInstance {
     pub last_activity_at: i64,
     #[prost(string, optional, tag = "8")]
     pub error: Option<String>,
+    #[prost(string, optional, tag = "9")]
+    pub workstream_name: Option<String>,
 }
 
 // ─── Task messages ────────────────────────────────────────────────────────────
+
+#[derive(Clone, PartialEq, prost::Message)]
+pub struct MilestoneDef {
+    #[prost(string, tag = "1")]
+    pub id: String,
+    #[prost(string, tag = "2")]
+    pub description: String,
+}
+
+#[derive(Clone, PartialEq, prost::Message)]
+pub struct WorkstreamDef {
+    #[prost(string, tag = "1")]
+    pub name: String,
+    #[prost(string, tag = "2")]
+    pub description: String,
+    #[prost(string, repeated, tag = "3")]
+    pub dependencies: Vec<String>,
+    #[prost(message, repeated, tag = "4")]
+    pub emits: Vec<MilestoneDef>,
+    #[prost(message, repeated, tag = "5")]
+    pub waits_for: Vec<MilestoneDef>,
+}
 
 #[derive(Clone, PartialEq, prost::Message)]
 pub struct TaskPlan {
@@ -145,6 +169,10 @@ pub struct TaskPlan {
     pub risks: Vec<String>,
     #[prost(enumeration = "EstimatedComplexity", tag = "5")]
     pub estimated_complexity: i32,
+    #[prost(string, optional, tag = "6")]
+    pub context: Option<String>,
+    #[prost(message, repeated, tag = "7")]
+    pub workstreams: Vec<WorkstreamDef>,
 }
 
 #[derive(Clone, PartialEq, prost::Message)]
@@ -391,6 +419,40 @@ pub struct CostUpdateEvent {
     pub total_cost_usd: f64,
 }
 
+// ─── New event payload messages ────────────────────────────────────────────────
+
+#[derive(Clone, PartialEq, prost::Message)]
+pub struct MilestoneReachedEvent {
+    #[prost(string, tag = "1")]
+    pub milestone_id: String,
+    #[prost(string, tag = "2")]
+    pub workstream_name: String,
+}
+
+#[derive(Clone, PartialEq, prost::Message)]
+pub struct ToolUseEvent {
+    #[prost(string, tag = "1")]
+    pub agent_id: String,
+    #[prost(string, tag = "2")]
+    pub tool_use_id: String,
+    #[prost(string, tag = "3")]
+    pub tool_name: String,
+    #[prost(string, tag = "4")]
+    pub tool_input_json: String,
+}
+
+#[derive(Clone, PartialEq, prost::Message)]
+pub struct ToolResultEvent {
+    #[prost(string, tag = "1")]
+    pub agent_id: String,
+    #[prost(string, tag = "2")]
+    pub tool_use_id: String,
+    #[prost(bool, tag = "3")]
+    pub is_error: bool,
+    #[prost(string, tag = "4")]
+    pub output: String,
+}
+
 // ─── Unified event wrapper ─────────────────────────────────────────────────────
 
 #[derive(Clone, PartialEq, prost::Message)]
@@ -401,7 +463,7 @@ pub struct FantasiaEvent {
     pub sequence: u64,
     #[prost(
         oneof = "fantasia_event::Payload",
-        tags = "10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33, 40"
+        tags = "10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33, 40, 42, 43, 44"
     )]
     pub payload: Option<fantasia_event::Payload>,
 }
@@ -435,5 +497,11 @@ pub mod fantasia_event {
         UserInputNeeded(super::UserInputNeededEvent),
         #[prost(message, tag = "40")]
         CostUpdate(super::CostUpdateEvent),
+        #[prost(message, tag = "42")]
+        MilestoneReached(super::MilestoneReachedEvent),
+        #[prost(message, tag = "43")]
+        ToolUse(super::ToolUseEvent),
+        #[prost(message, tag = "44")]
+        ToolResult(super::ToolResultEvent),
     }
 }

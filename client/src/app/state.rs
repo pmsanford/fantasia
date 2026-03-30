@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::time::Instant;
 
 /// Count the number of visual rows text will occupy with word wrapping.
@@ -14,17 +15,15 @@ fn wrap_line_count(text: &str, width: usize) -> usize {
         for word in line.split_inclusive(' ') {
             let wlen = word.len();
             if col + wlen > width && col > 0 {
-                // Word doesn't fit, wrap to next line
                 rows += 1;
                 col = 0;
             }
             if wlen > width {
-                // Word itself is wider than the line — break it
                 let remaining = wlen - (width - col).min(wlen);
                 col = remaining % width;
                 rows += (remaining + width - 1) / width;
                 if col == 0 {
-                    col = width; // filled exactly
+                    col = width;
                 }
             } else {
                 col += wlen;
@@ -35,9 +34,11 @@ fn wrap_line_count(text: &str, width: usize) -> usize {
     total
 }
 
-use crate::proto::{AgentInstance, AgentRole, TaskCounts};
+use crate::proto::{AgentInstance, AgentRole, Task, TaskCounts};
 
-/// Filter that determines which messages appear in a tab.
+// ─── Message types ────────────────────────────────────────────────────────────
+
+/// Filter that determines which messages appear in a chat tab.
 #[derive(Debug, Clone)]
 pub enum TabFilter {
     /// Show all messages.
@@ -58,18 +59,10 @@ impl TabFilter {
     }
 }
 
-/// A named tab with a message filter.
-#[derive(Debug, Clone)]
-pub struct ChatTab {
-    pub name: String,
-    pub filter: TabFilter,
-    pub scroll_offset: usize,
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum MessageRole {
     User,
-    Agent(String), // agent display name, e.g. "Mickey", "Imagineer"
+    Agent(String),
     System,
 }
 
@@ -86,8 +79,89 @@ pub struct PartialMessage {
     pub content: String,
 }
 
+// ─── Tool use tracking ────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone)]
+pub struct ToolResultEntry {
+    pub is_error: bool,
+    pub output: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct ToolUseEntry {
+    pub tool_use_id: String,
+    pub tool_name: String,
+    pub input_json: String,
+    pub result: Option<ToolResultEntry>,
+}
+
+// ─── Tab system ───────────────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum AgentSubTab {
+    Status,
+    Prompt,
+    Messages,
+    ToolLog,
+}
+
+impl AgentSubTab {
+    pub fn next(&self) -> Self {
+        match self {
+            AgentSubTab::Status => AgentSubTab::Prompt,
+            AgentSubTab::Prompt => AgentSubTab::Messages,
+            AgentSubTab::Messages => AgentSubTab::ToolLog,
+            AgentSubTab::ToolLog => AgentSubTab::Status,
+        }
+    }
+
+    pub fn prev(&self) -> Self {
+        match self {
+            AgentSubTab::Status => AgentSubTab::ToolLog,
+            AgentSubTab::Prompt => AgentSubTab::Status,
+            AgentSubTab::Messages => AgentSubTab::Prompt,
+            AgentSubTab::ToolLog => AgentSubTab::Messages,
+        }
+    }
+
+    pub fn label(&self) -> &'static str {
+        match self {
+            AgentSubTab::Status => "Status",
+            AgentSubTab::Prompt => "Prompt",
+            AgentSubTab::Messages => "Messages",
+            AgentSubTab::ToolLog => "Tool Log",
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum TabKind {
+    Chat {
+        filter: TabFilter,
+        scroll_offset: usize,
+    },
+    Plan {
+        /// Index of the selected workstream in the list.
+        selected_index: usize,
+        scroll_offset: usize,
+    },
+    AgentDetail {
+        agent_id: String,
+        sub_tab: AgentSubTab,
+        scroll_offset: usize,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub struct Tab {
+    pub name: String,
+    pub kind: TabKind,
+}
+
+// ─── App state ────────────────────────────────────────────────────────────────
+
 pub struct AppState {
-    /// Committed chat messages.
+    /// Committed chat messages (global log).
     pub messages: Vec<ChatMessage>,
     /// In-progress streaming message from an agent.
     pub partial_message: Option<PartialMessage>,
@@ -109,8 +183,8 @@ pub struct AppState {
     /// True while waiting for a Submit RPC to return.
     pub submitting: bool,
 
-    /// Chat tabs with per-tab filters and scroll offsets.
-    pub tabs: Vec<ChatTab>,
+    /// All tabs.
+    pub tabs: Vec<Tab>,
     /// Index of the currently active tab.
     pub active_tab: usize,
 
@@ -120,9 +194,21 @@ pub struct AppState {
     /// When we last received any event/response from the server.
     pub last_server_update: Option<Instant>,
 
-    /// Toggles every render cycle to blink the partial-message cursor.
+    /// Toggles every 500ms for cursor blink.
     pub blink_state: bool,
     pub last_blink: Instant,
+
+    /// Full task objects keyed by task ID.
+    pub tasks: HashMap<String, Task>,
+
+    /// Milestones that have been reached: (milestone_id, workstream_name).
+    pub milestones_reached: Vec<(String, String)>,
+
+    /// Per-agent tool use history, keyed by agent_id.
+    pub tool_uses: HashMap<String, Vec<ToolUseEntry>>,
+
+    /// Per-agent message history, keyed by agent_id.
+    pub agent_messages: HashMap<String, Vec<ChatMessage>>,
 }
 
 impl AppState {
@@ -139,21 +225,36 @@ impl AppState {
             submitting: false,
             last_server_update: None,
             tabs: vec![
-                ChatTab {
+                Tab {
                     name: "Mickey".into(),
-                    filter: TabFilter::Agents(vec!["Mickey".into()]),
-                    scroll_offset: 0,
+                    kind: TabKind::Chat {
+                        filter: TabFilter::Agents(vec!["Mickey".into()]),
+                        scroll_offset: 0,
+                    },
                 },
-                ChatTab {
+                Tab {
                     name: "All".into(),
-                    filter: TabFilter::All,
-                    scroll_offset: 0,
+                    kind: TabKind::Chat {
+                        filter: TabFilter::All,
+                        scroll_offset: 0,
+                    },
+                },
+                Tab {
+                    name: "Plan".into(),
+                    kind: TabKind::Plan {
+                        selected_index: 0,
+                        scroll_offset: 0,
+                    },
                 },
             ],
             active_tab: 0,
             status_line: None,
             blink_state: true,
             last_blink: Instant::now(),
+            tasks: HashMap::new(),
+            milestones_reached: Vec::new(),
+            tool_uses: HashMap::new(),
+            agent_messages: HashMap::new(),
         }
     }
 
@@ -165,10 +266,17 @@ impl AppState {
                     agent.config.as_ref().map(|c| c.role).unwrap_or(0),
                 )
                 .unwrap_or(AgentRole::Unspecified);
+                // For broomsticks, use their actual name from config
+                if role == AgentRole::Broomstick {
+                    if let Some(config) = &agent.config {
+                        if !config.name.is_empty() {
+                            return config.name.clone();
+                        }
+                    }
+                }
                 return role.as_str().to_string();
             }
         }
-        // Fallback: short ID
         format!("Agent({})", &agent_id[..agent_id.len().min(8)])
     }
 
@@ -234,7 +342,6 @@ impl AppState {
     }
 
     /// Compute how many rows the input area needs (including border).
-    /// `width` is the total widget width including borders.
     pub fn input_height(&self, width: u16) -> u16 {
         let inner_width = (width.saturating_sub(2) as usize).max(1);
         let text = if self.input_buffer.is_empty() {
@@ -254,12 +361,20 @@ impl AppState {
 
     /// Scroll offset for the active tab.
     pub fn scroll_offset(&self) -> usize {
-        self.tabs[self.active_tab].scroll_offset
+        match &self.tabs[self.active_tab].kind {
+            TabKind::Chat { scroll_offset, .. } => *scroll_offset,
+            TabKind::Plan { scroll_offset, .. } => *scroll_offset,
+            TabKind::AgentDetail { scroll_offset, .. } => *scroll_offset,
+        }
     }
 
     /// Mutable reference to scroll offset for the active tab.
     pub fn scroll_offset_mut(&mut self) -> &mut usize {
-        &mut self.tabs[self.active_tab].scroll_offset
+        match &mut self.tabs[self.active_tab].kind {
+            TabKind::Chat { scroll_offset, .. } => scroll_offset,
+            TabKind::Plan { scroll_offset, .. } => scroll_offset,
+            TabKind::AgentDetail { scroll_offset, .. } => scroll_offset,
+        }
     }
 
     /// Switch to the next tab.
@@ -276,11 +391,66 @@ impl AppState {
         };
     }
 
-    /// Add a chat message and reset scroll to bottom on all tabs.
+    /// Open an agent detail tab for the given agent, switching to it.
+    pub fn open_agent_detail(&mut self, agent_id: String, agent_name: String) {
+        // Check if a detail tab for this agent already exists
+        for (i, tab) in self.tabs.iter().enumerate() {
+            if let TabKind::AgentDetail { agent_id: id, .. } = &tab.kind {
+                if *id == agent_id {
+                    self.active_tab = i;
+                    return;
+                }
+            }
+        }
+        self.tabs.push(Tab {
+            name: agent_name,
+            kind: TabKind::AgentDetail {
+                agent_id,
+                sub_tab: AgentSubTab::Status,
+                scroll_offset: 0,
+            },
+        });
+        self.active_tab = self.tabs.len() - 1;
+    }
+
+    /// Close the current tab (if it's an AgentDetail) and return to previous tab.
+    pub fn close_active_tab(&mut self) {
+        if self.tabs.len() <= 1 {
+            return;
+        }
+        if matches!(self.tabs[self.active_tab].kind, TabKind::AgentDetail { .. }) {
+            self.tabs.remove(self.active_tab);
+            self.active_tab = self.active_tab.saturating_sub(1).min(self.tabs.len() - 1);
+        }
+    }
+
+    /// Add a chat message and reset scroll to bottom on all Chat tabs.
     pub fn push_message(&mut self, role: MessageRole, content: String) {
         self.messages.push(ChatMessage { role, content });
         for tab in &mut self.tabs {
-            tab.scroll_offset = 0;
+            if let TabKind::Chat { scroll_offset, .. } = &mut tab.kind {
+                *scroll_offset = 0;
+            }
         }
+    }
+
+    /// Returns the most recent task that has a plan with workstreams, for Plan tab display.
+    pub fn active_plan_task(&self) -> Option<&Task> {
+        self.tasks
+            .values()
+            .filter(|t| t.plan.as_ref().map_or(false, |p| !p.workstreams.is_empty()))
+            .max_by_key(|t| t.created_at)
+    }
+
+    /// Check if a milestone has been reached.
+    pub fn milestone_reached(&self, id: &str) -> bool {
+        self.milestones_reached.iter().any(|(mid, _)| mid == id)
+    }
+
+    /// Find the broomstick agent assigned to a given workstream name.
+    pub fn agent_for_workstream(&self, workstream_name: &str) -> Option<&AgentInstance> {
+        self.agents.iter().find(|a| {
+            a.workstream_name.as_deref() == Some(workstream_name)
+        })
     }
 }

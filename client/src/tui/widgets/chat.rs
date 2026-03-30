@@ -6,7 +6,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::{state::MessageRole, AppState};
+use crate::app::{state::{MessageRole, TabKind}, AppState};
 
 pub fn render(f: &mut Frame, area: Rect, state: &AppState) {
     // Split area: 1 line for tabs, rest for chat
@@ -49,7 +49,10 @@ fn render_tab_bar(f: &mut Frame, area: Rect, state: &AppState) {
 
 fn render_chat(f: &mut Frame, area: Rect, state: &AppState) {
     let inner_width = area.width.saturating_sub(2) as usize;
-    let active_filter = &state.tabs[state.active_tab].filter;
+    let active_filter = match &state.tabs[state.active_tab].kind {
+        TabKind::Chat { filter, .. } => filter,
+        _ => return,
+    };
 
     let mut lines: Vec<Line<'static>> = Vec::new();
 
@@ -127,7 +130,7 @@ fn render_chat(f: &mut Frame, area: Rect, state: &AppState) {
     f.render_widget(paragraph, area);
 }
 
-fn agent_color(name: &str) -> Color {
+pub fn agent_color(name: &str) -> Color {
     match name {
         "Mickey" => Color::Cyan,
         "Yen Sid" => Color::Magenta,
@@ -139,7 +142,7 @@ fn agent_color(name: &str) -> Color {
     }
 }
 
-fn render_message(
+pub fn render_message(
     lines: &mut Vec<Line<'static>>,
     role: &MessageRole,
     content: &str,

@@ -48,6 +48,11 @@ import {
   SubtaskDefSchema,
   TaskCountsSchema,
   CostBreakdownSchema,
+  MilestoneDefSchema,
+  WorkstreamDefSchema,
+  MilestoneReachedEventSchema,
+  ToolUseEventSchema,
+  ToolResultEventSchema,
 } from './gen/fantasia/v1/types_pb.js';
 
 import type {
@@ -230,6 +235,7 @@ export function toProtoAgentInstance(instance: CoreAgentInstance): ProtoAgentIns
     startedAt: BigInt(instance.startedAt),
     lastActivityAt: BigInt(instance.lastActivityAt),
     error: instance.error,
+    workstreamName: instance.workstreamName,
   });
 }
 
@@ -239,14 +245,19 @@ export function toProtoTaskPlan(plan: CoreTaskPlan) {
   return create(TaskPlanSchema, {
     summary: plan.summary,
     steps: plan.steps,
-    subtasks: (plan.subtasks ?? []).map((s: { description: string; dependencies?: string[] }) =>
-      create(SubtaskDefSchema, {
-        description: s.description,
-        dependencies: s.dependencies ?? [],
-      })
-    ),
+    subtasks: [],
     risks: plan.risks ?? [],
     estimatedComplexity: COMPLEXITY_TO_PROTO[plan.estimatedComplexity] ?? EstimatedComplexity.UNSPECIFIED,
+    context: plan.context,
+    workstreams: (plan.workstreams ?? []).map(ws =>
+      create(WorkstreamDefSchema, {
+        name: ws.name,
+        description: ws.description,
+        dependencies: ws.dependencies ?? [],
+        emits: (ws.emits ?? []).map(m => create(MilestoneDefSchema, { id: m.id, description: m.description })),
+        waitsFor: (ws.waitsFor ?? []).map(m => create(MilestoneDefSchema, { id: m.id, description: m.description })),
+      })
+    ),
   });
 }
 
@@ -338,6 +349,73 @@ export function toProtoCostBreakdown(
 }
 
 // ─── Fantasia Event ─────────────────────────────────
+
+/**
+ * Convert a core event to one or more proto events.
+ * Returns an array because sdk:message events may also emit ToolUseEvent/ToolResultEvent.
+ */
+export function toProtoFantasiaEvents(
+  event: CoreFantasiaEvent,
+  sequence: number,
+): ProtoFantasiaEvent[] {
+  const primary = toProtoFantasiaEvent(event, sequence);
+  if (event.type !== 'sdk:message') return [primary];
+
+  // Extract tool_use and tool_result events from SDK messages
+  const extra: ProtoFantasiaEvent[] = [];
+  const msg = event.sdkMessage as any;
+  const base = { timestamp: BigInt(Date.now()) };
+
+  if (msg?.type === 'assistant') {
+    const content: any[] = msg.message?.content ?? [];
+    for (const block of content) {
+      if (block.type === 'tool_use') {
+        extra.push(create(FantasiaEventSchema, {
+          ...base,
+          sequence: BigInt(sequence),
+          payload: {
+            case: 'toolUse' as const,
+            value: create(ToolUseEventSchema, {
+              agentId: event.agentId,
+              toolUseId: block.id ?? '',
+              toolName: block.name ?? '',
+              toolInputJson: JSON.stringify(block.input ?? {}),
+            }),
+          },
+        }));
+      }
+    }
+  }
+
+  if (msg?.type === 'user') {
+    const content: any[] = Array.isArray(msg.message?.content) ? msg.message.content : [];
+    for (const block of content) {
+      if (block.type === 'tool_result') {
+        const outputParts: string[] = [];
+        const resultContent = Array.isArray(block.content) ? block.content : (block.content ? [block.content] : []);
+        for (const rc of resultContent) {
+          if (typeof rc === 'string') outputParts.push(rc);
+          else if (rc?.type === 'text') outputParts.push(rc.text ?? '');
+        }
+        extra.push(create(FantasiaEventSchema, {
+          ...base,
+          sequence: BigInt(sequence),
+          payload: {
+            case: 'toolResult' as const,
+            value: create(ToolResultEventSchema, {
+              agentId: event.agentId,
+              toolUseId: block.tool_use_id ?? '',
+              isError: block.is_error ?? false,
+              output: outputParts.join('').slice(0, 4096),
+            }),
+          },
+        }));
+      }
+    }
+  }
+
+  return [primary, ...extra];
+}
 
 export function toProtoFantasiaEvent(
   event: CoreFantasiaEvent,
@@ -494,6 +572,17 @@ export function toProtoFantasiaEvent(
           value: create(SdkMessageEventSchema, {
             agentId: event.agentId,
             sdkMessageJson: new TextEncoder().encode(JSON.stringify(event.sdkMessage)),
+          }),
+        },
+      });
+    case 'milestone:reached':
+      return create(FantasiaEventSchema, {
+        ...base,
+        payload: {
+          case: 'milestoneReached' as const,
+          value: create(MilestoneReachedEventSchema, {
+            milestoneId: event.milestoneId,
+            workstreamName: event.workstreamName,
           }),
         },
       });

@@ -1,5 +1,7 @@
+mod agent_detail;
 mod chat;
 mod input;
+pub mod plan;
 mod status_bar;
 
 use ratatui::{
@@ -7,19 +9,25 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::AppState;
+use crate::app::{state::TabKind, AppState};
 
 pub fn render(f: &mut Frame, state: &mut AppState) {
     let area = f.area();
     let input_height = state.input_height(area.width);
     let chunks = Layout::vertical([
         Constraint::Length(2),             // status bar
-        Constraint::Fill(1),              // chat
-        Constraint::Length(input_height),  // input (grows with content)
+        Constraint::Fill(1),              // main content
+        Constraint::Length(input_height),  // input
     ])
     .split(area);
 
     status_bar::render(f, chunks[0], state);
-    chat::render(f, chunks[1], state);
+
+    match &state.tabs[state.active_tab].kind {
+        TabKind::Chat { .. } => chat::render(f, chunks[1], state),
+        TabKind::Plan { .. } => plan::render(f, chunks[1], state),
+        TabKind::AgentDetail { .. } => agent_detail::render(f, chunks[1], state),
+    }
+
     input::render(f, chunks[2], state);
 }

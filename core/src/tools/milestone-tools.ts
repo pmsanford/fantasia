@@ -1,6 +1,7 @@
 import { z } from 'zod/v4';
-import type { SdkAdapter, McpSdkServerConfigWithInstance } from '../types.js';
+import type { SdkAdapter, McpSdkServerConfigWithInstance, AgentStatus } from '../types.js';
 import type { MilestoneTracker } from '../milestones/milestone-tracker.js';
+import type { FantasiaEventEmitter } from '../events/event-emitter.js';
 import logger from '../logger.js';
 
 const log = logger.child('milestone-tools');
@@ -9,12 +10,23 @@ const log = logger.child('milestone-tools');
  * Create milestone coordination MCP tools for a broomstick worker.
  * Each broomstick gets its own server instance (with workstreamName bound),
  * but all share the same MilestoneTracker.
+ *
+ * Pass agentId and events to get automatic agent:status-changed events
+ * when a broomstick blocks/unblocks on a milestone.
  */
 export function createMilestoneTools(
   sdk: SdkAdapter,
   tracker: MilestoneTracker,
   workstreamName: string,
+  agentId?: string,
+  events?: FantasiaEventEmitter,
 ): { server: McpSdkServerConfigWithInstance; toolNames: string[] } {
+  const emitStatusChange = (newStatus: AgentStatus) => {
+    if (agentId && events) {
+      const oldStatus: AgentStatus = newStatus === 'waiting' ? 'working' : 'waiting';
+      events.emit({ type: 'agent:status-changed', agentId, oldStatus, newStatus });
+    }
+  };
   const emitMilestone = sdk.tool(
     'emit_milestone',
     'Signal that a milestone has been reached. Other parallel workstreams waiting on this milestone will be immediately unblocked. Idempotent — safe to call more than once.',
@@ -44,8 +56,10 @@ export function createMilestoneTools(
     async (args) => {
       const timeoutMs = (args.timeout_seconds ?? 300) * 1000;
       log.info('wait_for_milestone called', { milestoneId: args.milestone_id, workstreamName, timeoutMs });
+      emitStatusChange('waiting');
       try {
         await tracker.waitFor(args.milestone_id, timeoutMs);
+        emitStatusChange('working');
         log.info('wait_for_milestone resolved', { milestoneId: args.milestone_id, workstreamName });
         return {
           content: [{
@@ -54,6 +68,7 @@ export function createMilestoneTools(
           }],
         };
       } catch (err) {
+        emitStatusChange('working');
         log.warn('wait_for_milestone failed', { milestoneId: args.milestone_id, workstreamName, error: String(err) });
         return {
           content: [{

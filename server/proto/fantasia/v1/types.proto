@@ -87,6 +87,7 @@ message AgentInstance {
   int64 started_at = 6;
   int64 last_activity_at = 7;
   optional string error = 8;
+  optional string workstream_name = 9;
 }
 
 // ─── Task messages ──────────────────────────────────
@@ -96,12 +97,27 @@ message SubtaskDef {
   repeated string dependencies = 2;
 }
 
+message MilestoneDef {
+  string id = 1;
+  string description = 2;
+}
+
+message WorkstreamDef {
+  string name = 1;
+  string description = 2;
+  repeated string dependencies = 3;
+  repeated MilestoneDef emits = 4;
+  repeated MilestoneDef waits_for = 5;
+}
+
 message TaskPlan {
   string summary = 1;
   repeated string steps = 2;
   repeated SubtaskDef subtasks = 3;
   repeated string risks = 4;
   EstimatedComplexity estimated_complexity = 5;
+  optional string context = 6;
+  repeated WorkstreamDef workstreams = 7;
 }
 
 message TaskReview {
@@ -253,6 +269,25 @@ message SdkMessageEvent {
   bytes sdk_message_json = 2;
 }
 
+message MilestoneReachedEvent {
+  string milestone_id = 1;
+  string workstream_name = 2;
+}
+
+message ToolUseEvent {
+  string agent_id = 1;
+  string tool_use_id = 2;
+  string tool_name = 3;
+  string tool_input_json = 4;
+}
+
+message ToolResultEvent {
+  string agent_id = 1;
+  string tool_use_id = 2;
+  bool is_error = 3;
+  string output = 4;
+}
+
 // ─── Unified event wrapper ──────────────────────────
 
 message FantasiaEvent {
@@ -274,5 +309,8 @@ message FantasiaEvent {
     UserInputNeededEvent user_input_needed = 33;
     CostUpdateEvent cost_update = 40;
     SdkMessageEvent sdk_message = 41;
+    MilestoneReachedEvent milestone_reached = 42;
+    ToolUseEvent tool_use = 43;
+    ToolResultEvent tool_result = 44;
   }
 }

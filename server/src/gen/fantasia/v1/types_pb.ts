@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file fantasia/v1/types.proto.
  */
 export const file_fantasia_v1_types: GenFile = /*@__PURE__*/
-  fileDesc("ChdmYW50YXNpYS92MS90eXBlcy5wcm90bxILZmFudGFzaWEudjEi2wMKC0FnZW50Q29uZmlnEiQKBHJvbGUYASABKA4yFi5mYW50YXNpYS52MS5BZ2VudFJvbGUSDAoEbmFtZRgCIAEoCRIVCg1zeXN0ZW1fcHJvbXB0GAMgASgJEg0KBW1vZGVsGAQgASgJEg0KBXRvb2xzGAUgAygJEhgKEGRpc2FsbG93ZWRfdG9vbHMYBiADKAkSFQoNYWxsb3dlZF90b29scxgHIAMoCRIWCgltYXhfdHVybnMYCCABKA1IAIgBARIbCg5tYXhfYnVkZ2V0X3VzZBgJIAEoAUgBiAEBEhMKBmVmZm9ydBgKIAEoCUgCiAEBEhoKDW91dHB1dF9mb3JtYXQYCyABKAlIA4gBARIcCg9wZXJzaXN0X3Nlc3Npb24YDCABKAhIBIgBARIcCg9wZXJtaXNzaW9uX21vZGUYDSABKAlIBYgBARIZCgx0b29sc19wcmVzZXQYDiABKAlIBogBAUIMCgpfbWF4X3R1cm5zQhEKD19tYXhfYnVkZ2V0X3VzZEIJCgdfZWZmb3J0QhAKDl9vdXRwdXRfZm9ybWF0QhIKEF9wZXJzaXN0X3Nlc3Npb25CEgoQX3Blcm1pc3Npb25fbW9kZUIPCg1fdG9vbHNfcHJlc2V0IpUCCg1BZ2VudEluc3RhbmNlEgoKAmlkGAEgASgJEigKBmNvbmZpZxgCIAEoCzIYLmZhbnRhc2lhLnYxLkFnZW50Q29uZmlnEigKBnN0YXR1cxgDIAEoDjIYLmZhbnRhc2lhLnYxLkFnZW50U3RhdHVzEhwKD2N1cnJlbnRfdGFza19pZBgEIAEoCUgAiAEBEhcKCnNlc3Npb25faWQYBSABKAlIAYgBARISCgpzdGFydGVkX2F0GAYgASgDEhgKEGxhc3RfYWN0aXZpdHlfYXQYByABKAMSEgoFZXJyb3IYCCABKAlIAogBAUISChBfY3VycmVudF90YXNrX2lkQg0KC19zZXNzaW9uX2lkQggKBl9lcnJvciI3CgpTdWJ0YXNrRGVmEhMKC2Rlc2NyaXB0aW9uGAEgASgJEhQKDGRlcGVuZGVuY2llcxgCIAMoCSKkAQoIVGFza1BsYW4SDwoHc3VtbWFyeRgBIAEoCRINCgVzdGVwcxgCIAMoCRIpCghzdWJ0YXNrcxgDIAMoCzIXLmZhbnRhc2lhLnYxLlN1YnRhc2tEZWYSDQoFcmlza3MYBCADKAkSPgoUZXN0aW1hdGVkX2NvbXBsZXhpdHkYBSABKA4yIC5mYW50YXNpYS52MS5Fc3RpbWF0ZWRDb21wbGV4aXR5InAKClRhc2tSZXZpZXcSEAoIYXBwcm92ZWQYASABKAgSEAoIY29uY2VybnMYAiADKAkSGAoQcmVxdWlyZWRfY2hhbmdlcxgDIAMoCRIRCglzdHJlbmd0aHMYBCADKAkSEQoJaXRlcmF0aW9uGAUgASgFIsIBCgpUYXNrUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDgoGb3V0cHV0GAIgASgJEhEKCWFydGlmYWN0cxgDIAMoCRIVCghjb3N0X3VzZBgEIAEoAUgAiAEBEhgKC2R1cmF0aW9uX21zGAUgASgDSAGIAQESGAoQdG9rZW5fdXNhZ2VfanNvbhgGIAEoDBIYChBtb2RlbF91c2FnZV9qc29uGAcgASgMQgsKCV9jb3N0X3VzZEIOCgxfZHVyYXRpb25fbXMi5gMKBFRhc2sSCgoCaWQYASABKAkSFgoJcGFyZW50X2lkGAIgASgJSACIAQESEwoLZGVzY3JpcHRpb24YAyABKAkSJwoGc3RhdHVzGAQgASgOMhcuZmFudGFzaWEudjEuVGFza1N0YXR1cxIrCghwcmlvcml0eRgFIAEoDjIZLmZhbnRhc2lhLnYxLlRhc2tQcmlvcml0eRIeChFhc3NpZ25lZF9hZ2VudF9pZBgGIAEoCUgBiAEBEhIKCmNyZWF0ZWRfYnkYByABKAkSKAoEcGxhbhgIIAEoCzIVLmZhbnRhc2lhLnYxLlRhc2tQbGFuSAKIAQESLAoGcmV2aWV3GAkgASgLMhcuZmFudGFzaWEudjEuVGFza1Jldmlld0gDiAEBEiwKBnJlc3VsdBgKIAEoCzIXLmZhbnRhc2lhLnYxLlRhc2tSZXN1bHRIBIgBARITCgtzdWJ0YXNrX2lkcxgLIAMoCRISCgpjcmVhdGVkX2F0GAwgASgDEhIKCnVwZGF0ZWRfYXQYDSABKAMSFQoNbWV0YWRhdGFfanNvbhgOIAEoDEIMCgpfcGFyZW50X2lkQhQKEl9hc3NpZ25lZF9hZ2VudF9pZEIHCgVfcGxhbkIJCgdfcmV2aWV3QgkKB19yZXN1bHQi4QEKC01lbW9yeUVudHJ5EgoKAmlkGAEgASgJEioKCmFnZW50X3JvbGUYAiABKA4yFi5mYW50YXNpYS52MS5BZ2VudFJvbGUSJQoEdHlwZRgDIAEoDjIXLmZhbnRhc2lhLnYxLk1lbW9yeVR5cGUSDwoHY29udGVudBgEIAEoCRIPCgdjb250ZXh0GAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJdGltZXN0YW1wGAcgASgDEhwKD3JlbGV2YW5jZV9zY29yZRgIIAEoAUgAiAEBQhIKEF9yZWxldmFuY2Vfc2NvcmUikgEKDUNvc3RCcmVha2Rvd24SFgoOdG90YWxfY29zdF91c2QYASABKAESOQoIYnlfYWdlbnQYAiADKAsyJy5mYW50YXNpYS52MS5Db3N0QnJlYWtkb3duLkJ5QWdlbnRFbnRyeRouCgxCeUFnZW50RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgBOgI4ASJfCgpUYXNrQ291bnRzEg8KB3BlbmRpbmcYASABKAUSDgoGYWN0aXZlGAIgASgFEhEKCWNvbXBsZXRlZBgDIAEoBRIOCgZmYWlsZWQYBCABKAUSDQoFdG90YWwYBSABKAUinwUKEk9yY2hlc3RyYXRvckNvbmZpZxISCgVtb2RlbBgBIAEoCUgAiAEBEhAKA2N3ZBgCIAEoCUgBiAEBEhUKDWFsbG93ZWRfdG9vbHMYAyADKAkSHAoPcGVybWlzc2lvbl9tb2RlGAQgASgJSAKIAQESJwoabWF4X2NvbmN1cnJlbnRfYnJvb21zdGlja3MYBSABKAVIA4gBARIbCg5tYXhfYnVkZ2V0X3VzZBgGIAEoAUgEiAEBEjUKA2VudhgHIAMoCzIoLmZhbnRhc2lhLnYxLk9yY2hlc3RyYXRvckNvbmZpZy5FbnZFbnRyeRIXCgptZW1vcnlfZGlyGAggASgJSAWIAQESTAoPbW9kZWxfb3ZlcnJpZGVzGAkgAygLMjMuZmFudGFzaWEudjEuT3JjaGVzdHJhdG9yQ29uZmlnLk1vZGVsT3ZlcnJpZGVzRW50cnkSSgoOZW5hYmxlZF9hZ2VudHMYCiADKAsyMi5mYW50YXNpYS52MS5PcmNoZXN0cmF0b3JDb25maWcuRW5hYmxlZEFnZW50c0VudHJ5GioKCEVudkVudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaNQoTTW9kZWxPdmVycmlkZXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGjQKEkVuYWJsZWRBZ2VudHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAg6AjgBQggKBl9tb2RlbEIGCgRfY3dkQhIKEF9wZXJtaXNzaW9uX21vZGVCHQobX21heF9jb25jdXJyZW50X2Jyb29tc3RpY2tzQhEKD19tYXhfYnVkZ2V0X3VzZEINCgtfbWVtb3J5X2RpciI+ChFBZ2VudFNwYXduZWRFdmVudBIpCgVhZ2VudBgBIAEoCzIaLmZhbnRhc2lhLnYxLkFnZW50SW5zdGFuY2UihwEKF0FnZW50U3RhdHVzQ2hhbmdlZEV2ZW50EhAKCGFnZW50X2lkGAEgASgJEiwKCm9sZF9zdGF0dXMYAiABKA4yGC5mYW50YXNpYS52MS5BZ2VudFN0YXR1cxIsCgpuZXdfc3RhdHVzGAMgASgOMhguZmFudGFzaWEudjEuQWdlbnRTdGF0dXMiSAoUQWdlbnRUZXJtaW5hdGVkRXZlbnQSEAoIYWdlbnRfaWQYASABKAkSEwoGcmVhc29uGAIgASgJSACIAQFCCQoHX3JlYXNvbiJKChFBZ2VudE1lc3NhZ2VFdmVudBIQCghhZ2VudF9pZBgBIAEoCRIPCgdjb250ZW50GAIgASgJEhIKCmlzX3BhcnRpYWwYAyABKAgiMwoQVGFza0NyZWF0ZWRFdmVudBIfCgR0YXNrGAEgASgLMhEuZmFudGFzaWEudjEuVGFzayKDAQoWVGFza1N0YXR1c0NoYW5nZWRFdmVudBIPCgd0YXNrX2lkGAEgASgJEisKCm9sZF9zdGF0dXMYAiABKA4yFy5mYW50YXNpYS52MS5UYXNrU3RhdHVzEisKCm5ld19zdGF0dXMYAyABKA4yFy5mYW50YXNpYS52MS5UYXNrU3RhdHVzIk4KElRhc2tDb21wbGV0ZWRFdmVudBIPCgd0YXNrX2lkGAEgASgJEicKBnJlc3VsdBgCIAEoCzIXLmZhbnRhc2lhLnYxLlRhc2tSZXN1bHQiMQoPVGFza0ZhaWxlZEV2ZW50Eg8KB3Rhc2tfaWQYASABKAkSDQoFZXJyb3IYAiABKAkiGAoWT3JjaGVzdHJhdG9yUmVhZHlFdmVudCIvChZPcmNoZXN0cmF0b3JFcnJvckV2ZW50EhUKDWVycm9yX21lc3NhZ2UYASABKAkiGgoYT3JjaGVzdHJhdG9yU3RvcHBlZEV2ZW50IkgKFFVzZXJJbnB1dE5lZWRlZEV2ZW50Eg4KBnByb21wdBgBIAEoCRIUCgd0YXNrX2lkGAIgASgJSACIAQFCCgoIX3Rhc2tfaWQimwEKD0Nvc3RVcGRhdGVFdmVudBIWCg50b3RhbF9jb3N0X3VzZBgBIAEoARI+CglicmVha2Rvd24YAiADKAsyKy5mYW50YXNpYS52MS5Db3N0VXBkYXRlRXZlbnQuQnJlYWtkb3duRW50cnkaMAoOQnJlYWtkb3duRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgBOgI4ASI9Cg9TZGtNZXNzYWdlRXZlbnQSEAoIYWdlbnRfaWQYASABKAkSGAoQc2RrX21lc3NhZ2VfanNvbhgCIAEoDCKYBwoNRmFudGFzaWFFdmVudBIRCgl0aW1lc3RhbXAYASABKAMSEAoIc2VxdWVuY2UYAiABKAQSNwoNYWdlbnRfc3Bhd25lZBgKIAEoCzIeLmZhbnRhc2lhLnYxLkFnZW50U3Bhd25lZEV2ZW50SAASRAoUYWdlbnRfc3RhdHVzX2NoYW5nZWQYCyABKAsyJC5mYW50YXNpYS52MS5BZ2VudFN0YXR1c0NoYW5nZWRFdmVudEgAEj0KEGFnZW50X3Rlcm1pbmF0ZWQYDCABKAsyIS5mYW50YXNpYS52MS5BZ2VudFRlcm1pbmF0ZWRFdmVudEgAEjcKDWFnZW50X21lc3NhZ2UYDSABKAsyHi5mYW50YXNpYS52MS5BZ2VudE1lc3NhZ2VFdmVudEgAEjUKDHRhc2tfY3JlYXRlZBgUIAEoCzIdLmZhbnRhc2lhLnYxLlRhc2tDcmVhdGVkRXZlbnRIABJCChN0YXNrX3N0YXR1c19jaGFuZ2VkGBUgASgLMiMuZmFudGFzaWEudjEuVGFza1N0YXR1c0NoYW5nZWRFdmVudEgAEjkKDnRhc2tfY29tcGxldGVkGBYgASgLMh8uZmFudGFzaWEudjEuVGFza0NvbXBsZXRlZEV2ZW50SAASMwoLdGFza19mYWlsZWQYFyABKAsyHC5mYW50YXNpYS52MS5UYXNrRmFpbGVkRXZlbnRIABJBChJvcmNoZXN0cmF0b3JfcmVhZHkYHiABKAsyIy5mYW50YXNpYS52MS5PcmNoZXN0cmF0b3JSZWFkeUV2ZW50SAASQQoSb3JjaGVzdHJhdG9yX2Vycm9yGB8gASgLMiMuZmFudGFzaWEudjEuT3JjaGVzdHJhdG9yRXJyb3JFdmVudEgAEkUKFG9yY2hlc3RyYXRvcl9zdG9wcGVkGCAgASgLMiUuZmFudGFzaWEudjEuT3JjaGVzdHJhdG9yU3RvcHBlZEV2ZW50SAASPgoRdXNlcl9pbnB1dF9uZWVkZWQYISABKAsyIS5mYW50YXNpYS52MS5Vc2VySW5wdXROZWVkZWRFdmVudEgAEjMKC2Nvc3RfdXBkYXRlGCggASgLMhwuZmFudGFzaWEudjEuQ29zdFVwZGF0ZUV2ZW50SAASMwoLc2RrX21lc3NhZ2UYKSABKAsyHC5mYW50YXNpYS52MS5TZGtNZXNzYWdlRXZlbnRIAEIJCgdwYXlsb2FkKqUBCglBZ2VudFJvbGUSGgoWQUdFTlRfUk9MRV9VTlNQRUNJRklFRBAAEhUKEUFHRU5UX1JPTEVfTUlDS0VZEAESFgoSQUdFTlRfUk9MRV9ZRU5fU0lEEAISGAoUQUdFTlRfUk9MRV9DSEVSTkFCT0cQAxIZChVBR0VOVF9ST0xFX0JST09NU1RJQ0sQBBIYChRBR0VOVF9ST0xFX0lNQUdJTkVFUhAFKqsBCgtBZ2VudFN0YXR1cxIcChhBR0VOVF9TVEFUVVNfVU5TUEVDSUZJRUQQABIVChFBR0VOVF9TVEFUVVNfSURMRRABEhgKFEFHRU5UX1NUQVRVU19XT1JLSU5HEAISGAoUQUdFTlRfU1RBVFVTX1dBSVRJTkcQAxIWChJBR0VOVF9TVEFUVVNfRVJST1IQBBIbChdBR0VOVF9TVEFUVVNfVEVSTUlOQVRFRBAFKuABCgpUYXNrU3RhdHVzEhsKF1RBU0tfU1RBVFVTX1VOU1BFQ0lGSUVEEAASFwoTVEFTS19TVEFUVVNfUEVORElORxABEhgKFFRBU0tfU1RBVFVTX1BMQU5OSU5HEAISGQoVVEFTS19TVEFUVVNfUkVWSUVXSU5HEAMSGwoXVEFTS19TVEFUVVNfSU5fUFJPR1JFU1MQBBIXChNUQVNLX1NUQVRVU19CTE9DS0VEEAUSGQoVVEFTS19TVEFUVVNfQ09NUExFVEVEEAYSFgoSVEFTS19TVEFUVVNfRkFJTEVEEAcqkgEKDFRhc2tQcmlvcml0eRIdChlUQVNLX1BSSU9SSVRZX1VOU1BFQ0lGSUVEEAASGgoWVEFTS19QUklPUklUWV9DUklUSUNBTBABEhYKElRBU0tfUFJJT1JJVFlfSElHSBACEhgKFFRBU0tfUFJJT1JJVFlfTk9STUFMEAMSFQoRVEFTS19QUklPUklUWV9MT1cQBCqRAQoKTWVtb3J5VHlwZRIbChdNRU1PUllfVFlQRV9VTlNQRUNJRklFRBAAEhYKEk1FTU9SWV9UWVBFX0xFU1NPThABEhkKFU1FTU9SWV9UWVBFX1JFSkVDVElPThACEhoKFk1FTU9SWV9UWVBFX1BSRUZFUkVOQ0UQAxIXChNNRU1PUllfVFlQRV9QQVRURVJOEAQqwwEKE0VzdGltYXRlZENvbXBsZXhpdHkSJAogRVNUSU1BVEVEX0NPTVBMRVhJVFlfVU5TUEVDSUZJRUQQABIgChxFU1RJTUFURURfQ09NUExFWElUWV9UUklWSUFMEAESHwobRVNUSU1BVEVEX0NPTVBMRVhJVFlfU0lNUExFEAISIQodRVNUSU1BVEVEX0NPTVBMRVhJVFlfTU9ERVJBVEUQAxIgChxFU1RJTUFURURfQ09NUExFWElUWV9DT01QTEVYEARiBnByb3RvMw");
+  fileDesc("ChdmYW50YXNpYS92MS90eXBlcy5wcm90bxILZmFudGFzaWEudjEi2wMKC0FnZW50Q29uZmlnEiQKBHJvbGUYASABKA4yFi5mYW50YXNpYS52MS5BZ2VudFJvbGUSDAoEbmFtZRgCIAEoCRIVCg1zeXN0ZW1fcHJvbXB0GAMgASgJEg0KBW1vZGVsGAQgASgJEg0KBXRvb2xzGAUgAygJEhgKEGRpc2FsbG93ZWRfdG9vbHMYBiADKAkSFQoNYWxsb3dlZF90b29scxgHIAMoCRIWCgltYXhfdHVybnMYCCABKA1IAIgBARIbCg5tYXhfYnVkZ2V0X3VzZBgJIAEoAUgBiAEBEhMKBmVmZm9ydBgKIAEoCUgCiAEBEhoKDW91dHB1dF9mb3JtYXQYCyABKAlIA4gBARIcCg9wZXJzaXN0X3Nlc3Npb24YDCABKAhIBIgBARIcCg9wZXJtaXNzaW9uX21vZGUYDSABKAlIBYgBARIZCgx0b29sc19wcmVzZXQYDiABKAlIBogBAUIMCgpfbWF4X3R1cm5zQhEKD19tYXhfYnVkZ2V0X3VzZEIJCgdfZWZmb3J0QhAKDl9vdXRwdXRfZm9ybWF0QhIKEF9wZXJzaXN0X3Nlc3Npb25CEgoQX3Blcm1pc3Npb25fbW9kZUIPCg1fdG9vbHNfcHJlc2V0IscCCg1BZ2VudEluc3RhbmNlEgoKAmlkGAEgASgJEigKBmNvbmZpZxgCIAEoCzIYLmZhbnRhc2lhLnYxLkFnZW50Q29uZmlnEigKBnN0YXR1cxgDIAEoDjIYLmZhbnRhc2lhLnYxLkFnZW50U3RhdHVzEhwKD2N1cnJlbnRfdGFza19pZBgEIAEoCUgAiAEBEhcKCnNlc3Npb25faWQYBSABKAlIAYgBARISCgpzdGFydGVkX2F0GAYgASgDEhgKEGxhc3RfYWN0aXZpdHlfYXQYByABKAMSEgoFZXJyb3IYCCABKAlIAogBARIcCg93b3Jrc3RyZWFtX25hbWUYCSABKAlIA4gBAUISChBfY3VycmVudF90YXNrX2lkQg0KC19zZXNzaW9uX2lkQggKBl9lcnJvckISChBfd29ya3N0cmVhbV9uYW1lIjcKClN1YnRhc2tEZWYSEwoLZGVzY3JpcHRpb24YASABKAkSFAoMZGVwZW5kZW5jaWVzGAIgAygJIi8KDE1pbGVzdG9uZURlZhIKCgJpZBgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCSKgAQoNV29ya3N0cmVhbURlZhIMCgRuYW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhQKDGRlcGVuZGVuY2llcxgDIAMoCRIoCgVlbWl0cxgEIAMoCzIZLmZhbnRhc2lhLnYxLk1pbGVzdG9uZURlZhIsCgl3YWl0c19mb3IYBSADKAsyGS5mYW50YXNpYS52MS5NaWxlc3RvbmVEZWYi9wEKCFRhc2tQbGFuEg8KB3N1bW1hcnkYASABKAkSDQoFc3RlcHMYAiADKAkSKQoIc3VidGFza3MYAyADKAsyFy5mYW50YXNpYS52MS5TdWJ0YXNrRGVmEg0KBXJpc2tzGAQgAygJEj4KFGVzdGltYXRlZF9jb21wbGV4aXR5GAUgASgOMiAuZmFudGFzaWEudjEuRXN0aW1hdGVkQ29tcGxleGl0eRIUCgdjb250ZXh0GAYgASgJSACIAQESLwoLd29ya3N0cmVhbXMYByADKAsyGi5mYW50YXNpYS52MS5Xb3Jrc3RyZWFtRGVmQgoKCF9jb250ZXh0InAKClRhc2tSZXZpZXcSEAoIYXBwcm92ZWQYASABKAgSEAoIY29uY2VybnMYAiADKAkSGAoQcmVxdWlyZWRfY2hhbmdlcxgDIAMoCRIRCglzdHJlbmd0aHMYBCADKAkSEQoJaXRlcmF0aW9uGAUgASgFIsIBCgpUYXNrUmVzdWx0Eg8KB3N1Y2Nlc3MYASABKAgSDgoGb3V0cHV0GAIgASgJEhEKCWFydGlmYWN0cxgDIAMoCRIVCghjb3N0X3VzZBgEIAEoAUgAiAEBEhgKC2R1cmF0aW9uX21zGAUgASgDSAGIAQESGAoQdG9rZW5fdXNhZ2VfanNvbhgGIAEoDBIYChBtb2RlbF91c2FnZV9qc29uGAcgASgMQgsKCV9jb3N0X3VzZEIOCgxfZHVyYXRpb25fbXMi5gMKBFRhc2sSCgoCaWQYASABKAkSFgoJcGFyZW50X2lkGAIgASgJSACIAQESEwoLZGVzY3JpcHRpb24YAyABKAkSJwoGc3RhdHVzGAQgASgOMhcuZmFudGFzaWEudjEuVGFza1N0YXR1cxIrCghwcmlvcml0eRgFIAEoDjIZLmZhbnRhc2lhLnYxLlRhc2tQcmlvcml0eRIeChFhc3NpZ25lZF9hZ2VudF9pZBgGIAEoCUgBiAEBEhIKCmNyZWF0ZWRfYnkYByABKAkSKAoEcGxhbhgIIAEoCzIVLmZhbnRhc2lhLnYxLlRhc2tQbGFuSAKIAQESLAoGcmV2aWV3GAkgASgLMhcuZmFudGFzaWEudjEuVGFza1Jldmlld0gDiAEBEiwKBnJlc3VsdBgKIAEoCzIXLmZhbnRhc2lhLnYxLlRhc2tSZXN1bHRIBIgBARITCgtzdWJ0YXNrX2lkcxgLIAMoCRISCgpjcmVhdGVkX2F0GAwgASgDEhIKCnVwZGF0ZWRfYXQYDSABKAMSFQoNbWV0YWRhdGFfanNvbhgOIAEoDEIMCgpfcGFyZW50X2lkQhQKEl9hc3NpZ25lZF9hZ2VudF9pZEIHCgVfcGxhbkIJCgdfcmV2aWV3QgkKB19yZXN1bHQi4QEKC01lbW9yeUVudHJ5EgoKAmlkGAEgASgJEioKCmFnZW50X3JvbGUYAiABKA4yFi5mYW50YXNpYS52MS5BZ2VudFJvbGUSJQoEdHlwZRgDIAEoDjIXLmZhbnRhc2lhLnYxLk1lbW9yeVR5cGUSDwoHY29udGVudBgEIAEoCRIPCgdjb250ZXh0GAUgASgJEgwKBHRhZ3MYBiADKAkSEQoJdGltZXN0YW1wGAcgASgDEhwKD3JlbGV2YW5jZV9zY29yZRgIIAEoAUgAiAEBQhIKEF9yZWxldmFuY2Vfc2NvcmUikgEKDUNvc3RCcmVha2Rvd24SFgoOdG90YWxfY29zdF91c2QYASABKAESOQoIYnlfYWdlbnQYAiADKAsyJy5mYW50YXNpYS52MS5Db3N0QnJlYWtkb3duLkJ5QWdlbnRFbnRyeRouCgxCeUFnZW50RW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgBOgI4ASJfCgpUYXNrQ291bnRzEg8KB3BlbmRpbmcYASABKAUSDgoGYWN0aXZlGAIgASgFEhEKCWNvbXBsZXRlZBgDIAEoBRIOCgZmYWlsZWQYBCABKAUSDQoFdG90YWwYBSABKAUinwUKEk9yY2hlc3RyYXRvckNvbmZpZxISCgVtb2RlbBgBIAEoCUgAiAEBEhAKA2N3ZBgCIAEoCUgBiAEBEhUKDWFsbG93ZWRfdG9vbHMYAyADKAkSHAoPcGVybWlzc2lvbl9tb2RlGAQgASgJSAKIAQESJwoabWF4X2NvbmN1cnJlbnRfYnJvb21zdGlja3MYBSABKAVIA4gBARIbCg5tYXhfYnVkZ2V0X3VzZBgGIAEoAUgEiAEBEjUKA2VudhgHIAMoCzIoLmZhbnRhc2lhLnYxLk9yY2hlc3RyYXRvckNvbmZpZy5FbnZFbnRyeRIXCgptZW1vcnlfZGlyGAggASgJSAWIAQESTAoPbW9kZWxfb3ZlcnJpZGVzGAkgAygLMjMuZmFudGFzaWEudjEuT3JjaGVzdHJhdG9yQ29uZmlnLk1vZGVsT3ZlcnJpZGVzRW50cnkSSgoOZW5hYmxlZF9hZ2VudHMYCiADKAsyMi5mYW50YXNpYS52MS5PcmNoZXN0cmF0b3JDb25maWcuRW5hYmxlZEFnZW50c0VudHJ5GioKCEVudkVudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEaNQoTTW9kZWxPdmVycmlkZXNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBGjQKEkVuYWJsZWRBZ2VudHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAg6AjgBQggKBl9tb2RlbEIGCgRfY3dkQhIKEF9wZXJtaXNzaW9uX21vZGVCHQobX21heF9jb25jdXJyZW50X2Jyb29tc3RpY2tzQhEKD19tYXhfYnVkZ2V0X3VzZEINCgtfbWVtb3J5X2RpciI+ChFBZ2VudFNwYXduZWRFdmVudBIpCgVhZ2VudBgBIAEoCzIaLmZhbnRhc2lhLnYxLkFnZW50SW5zdGFuY2UihwEKF0FnZW50U3RhdHVzQ2hhbmdlZEV2ZW50EhAKCGFnZW50X2lkGAEgASgJEiwKCm9sZF9zdGF0dXMYAiABKA4yGC5mYW50YXNpYS52MS5BZ2VudFN0YXR1cxIsCgpuZXdfc3RhdHVzGAMgASgOMhguZmFudGFzaWEudjEuQWdlbnRTdGF0dXMiSAoUQWdlbnRUZXJtaW5hdGVkRXZlbnQSEAoIYWdlbnRfaWQYASABKAkSEwoGcmVhc29uGAIgASgJSACIAQFCCQoHX3JlYXNvbiJKChFBZ2VudE1lc3NhZ2VFdmVudBIQCghhZ2VudF9pZBgBIAEoCRIPCgdjb250ZW50GAIgASgJEhIKCmlzX3BhcnRpYWwYAyABKAgiMwoQVGFza0NyZWF0ZWRFdmVudBIfCgR0YXNrGAEgASgLMhEuZmFudGFzaWEudjEuVGFzayKDAQoWVGFza1N0YXR1c0NoYW5nZWRFdmVudBIPCgd0YXNrX2lkGAEgASgJEisKCm9sZF9zdGF0dXMYAiABKA4yFy5mYW50YXNpYS52MS5UYXNrU3RhdHVzEisKCm5ld19zdGF0dXMYAyABKA4yFy5mYW50YXNpYS52MS5UYXNrU3RhdHVzIk4KElRhc2tDb21wbGV0ZWRFdmVudBIPCgd0YXNrX2lkGAEgASgJEicKBnJlc3VsdBgCIAEoCzIXLmZhbnRhc2lhLnYxLlRhc2tSZXN1bHQiMQoPVGFza0ZhaWxlZEV2ZW50Eg8KB3Rhc2tfaWQYASABKAkSDQoFZXJyb3IYAiABKAkiGAoWT3JjaGVzdHJhdG9yUmVhZHlFdmVudCIvChZPcmNoZXN0cmF0b3JFcnJvckV2ZW50EhUKDWVycm9yX21lc3NhZ2UYASABKAkiGgoYT3JjaGVzdHJhdG9yU3RvcHBlZEV2ZW50IkgKFFVzZXJJbnB1dE5lZWRlZEV2ZW50Eg4KBnByb21wdBgBIAEoCRIUCgd0YXNrX2lkGAIgASgJSACIAQFCCgoIX3Rhc2tfaWQimwEKD0Nvc3RVcGRhdGVFdmVudBIWCg50b3RhbF9jb3N0X3VzZBgBIAEoARI+CglicmVha2Rvd24YAiADKAsyKy5mYW50YXNpYS52MS5Db3N0VXBkYXRlRXZlbnQuQnJlYWtkb3duRW50cnkaMAoOQnJlYWtkb3duRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgBOgI4ASI9Cg9TZGtNZXNzYWdlRXZlbnQSEAoIYWdlbnRfaWQYASABKAkSGAoQc2RrX21lc3NhZ2VfanNvbhgCIAEoDCJGChVNaWxlc3RvbmVSZWFjaGVkRXZlbnQSFAoMbWlsZXN0b25lX2lkGAEgASgJEhcKD3dvcmtzdHJlYW1fbmFtZRgCIAEoCSJhCgxUb29sVXNlRXZlbnQSEAoIYWdlbnRfaWQYASABKAkSEwoLdG9vbF91c2VfaWQYAiABKAkSEQoJdG9vbF9uYW1lGAMgASgJEhcKD3Rvb2xfaW5wdXRfanNvbhgEIAEoCSJaCg9Ub29sUmVzdWx0RXZlbnQSEAoIYWdlbnRfaWQYASABKAkSEwoLdG9vbF91c2VfaWQYAiABKAkSEAoIaXNfZXJyb3IYAyABKAgSDgoGb3V0cHV0GAQgASgJIr0ICg1GYW50YXNpYUV2ZW50EhEKCXRpbWVzdGFtcBgBIAEoAxIQCghzZXF1ZW5jZRgCIAEoBBI3Cg1hZ2VudF9zcGF3bmVkGAogASgLMh4uZmFudGFzaWEudjEuQWdlbnRTcGF3bmVkRXZlbnRIABJEChRhZ2VudF9zdGF0dXNfY2hhbmdlZBgLIAEoCzIkLmZhbnRhc2lhLnYxLkFnZW50U3RhdHVzQ2hhbmdlZEV2ZW50SAASPQoQYWdlbnRfdGVybWluYXRlZBgMIAEoCzIhLmZhbnRhc2lhLnYxLkFnZW50VGVybWluYXRlZEV2ZW50SAASNwoNYWdlbnRfbWVzc2FnZRgNIAEoCzIeLmZhbnRhc2lhLnYxLkFnZW50TWVzc2FnZUV2ZW50SAASNQoMdGFza19jcmVhdGVkGBQgASgLMh0uZmFudGFzaWEudjEuVGFza0NyZWF0ZWRFdmVudEgAEkIKE3Rhc2tfc3RhdHVzX2NoYW5nZWQYFSABKAsyIy5mYW50YXNpYS52MS5UYXNrU3RhdHVzQ2hhbmdlZEV2ZW50SAASOQoOdGFza19jb21wbGV0ZWQYFiABKAsyHy5mYW50YXNpYS52MS5UYXNrQ29tcGxldGVkRXZlbnRIABIzCgt0YXNrX2ZhaWxlZBgXIAEoCzIcLmZhbnRhc2lhLnYxLlRhc2tGYWlsZWRFdmVudEgAEkEKEm9yY2hlc3RyYXRvcl9yZWFkeRgeIAEoCzIjLmZhbnRhc2lhLnYxLk9yY2hlc3RyYXRvclJlYWR5RXZlbnRIABJBChJvcmNoZXN0cmF0b3JfZXJyb3IYHyABKAsyIy5mYW50YXNpYS52MS5PcmNoZXN0cmF0b3JFcnJvckV2ZW50SAASRQoUb3JjaGVzdHJhdG9yX3N0b3BwZWQYICABKAsyJS5mYW50YXNpYS52MS5PcmNoZXN0cmF0b3JTdG9wcGVkRXZlbnRIABI+ChF1c2VyX2lucHV0X25lZWRlZBghIAEoCzIhLmZhbnRhc2lhLnYxLlVzZXJJbnB1dE5lZWRlZEV2ZW50SAASMwoLY29zdF91cGRhdGUYKCABKAsyHC5mYW50YXNpYS52MS5Db3N0VXBkYXRlRXZlbnRIABIzCgtzZGtfbWVzc2FnZRgpIAEoCzIcLmZhbnRhc2lhLnYxLlNka01lc3NhZ2VFdmVudEgAEj8KEW1pbGVzdG9uZV9yZWFjaGVkGCogASgLMiIuZmFudGFzaWEudjEuTWlsZXN0b25lUmVhY2hlZEV2ZW50SAASLQoIdG9vbF91c2UYKyABKAsyGS5mYW50YXNpYS52MS5Ub29sVXNlRXZlbnRIABIzCgt0b29sX3Jlc3VsdBgsIAEoCzIcLmZhbnRhc2lhLnYxLlRvb2xSZXN1bHRFdmVudEgAQgkKB3BheWxvYWQqvQEKCUFnZW50Um9sZRIaChZBR0VOVF9ST0xFX1VOU1BFQ0lGSUVEEAASFQoRQUdFTlRfUk9MRV9NSUNLRVkQARIWChJBR0VOVF9ST0xFX1lFTl9TSUQQAhIYChRBR0VOVF9ST0xFX0NIRVJOQUJPRxADEhkKFUFHRU5UX1JPTEVfQlJPT01TVElDSxAEEhgKFEFHRU5UX1JPTEVfSU1BR0lORUVSEAUSFgoSQUdFTlRfUk9MRV9KQUNDSFVTEAYqqwEKC0FnZW50U3RhdHVzEhwKGEFHRU5UX1NUQVRVU19VTlNQRUNJRklFRBAAEhUKEUFHRU5UX1NUQVRVU19JRExFEAESGAoUQUdFTlRfU1RBVFVTX1dPUktJTkcQAhIYChRBR0VOVF9TVEFUVVNfV0FJVElORxADEhYKEkFHRU5UX1NUQVRVU19FUlJPUhAEEhsKF0FHRU5UX1NUQVRVU19URVJNSU5BVEVEEAUq4AEKClRhc2tTdGF0dXMSGwoXVEFTS19TVEFUVVNfVU5TUEVDSUZJRUQQABIXChNUQVNLX1NUQVRVU19QRU5ESU5HEAESGAoUVEFTS19TVEFUVVNfUExBTk5JTkcQAhIZChVUQVNLX1NUQVRVU19SRVZJRVdJTkcQAxIbChdUQVNLX1NUQVRVU19JTl9QUk9HUkVTUxAEEhcKE1RBU0tfU1RBVFVTX0JMT0NLRUQQBRIZChVUQVNLX1NUQVRVU19DT01QTEVURUQQBhIWChJUQVNLX1NUQVRVU19GQUlMRUQQByqSAQoMVGFza1ByaW9yaXR5Eh0KGVRBU0tfUFJJT1JJVFlfVU5TUEVDSUZJRUQQABIaChZUQVNLX1BSSU9SSVRZX0NSSVRJQ0FMEAESFgoSVEFTS19QUklPUklUWV9ISUdIEAISGAoUVEFTS19QUklPUklUWV9OT1JNQUwQAxIVChFUQVNLX1BSSU9SSVRZX0xPVxAEKpEBCgpNZW1vcnlUeXBlEhsKF01FTU9SWV9UWVBFX1VOU1BFQ0lGSUVEEAASFgoSTUVNT1JZX1RZUEVfTEVTU09OEAESGQoVTUVNT1JZX1RZUEVfUkVKRUNUSU9OEAISGgoWTUVNT1JZX1RZUEVfUFJFRkVSRU5DRRADEhcKE01FTU9SWV9UWVBFX1BBVFRFUk4QBCrDAQoTRXN0aW1hdGVkQ29tcGxleGl0eRIkCiBFU1RJTUFURURfQ09NUExFWElUWV9VTlNQRUNJRklFRBAAEiAKHEVTVElNQVRFRF9DT01QTEVYSVRZX1RSSVZJQUwQARIfChtFU1RJTUFURURfQ09NUExFWElUWV9TSU1QTEUQAhIhCh1FU1RJTUFURURfQ09NUExFWElUWV9NT0RFUkFURRADEiAKHEVTVElNQVRFRF9DT01QTEVYSVRZX0NPTVBMRVgQBGIGcHJvdG8z");
 
 /**
  * @generated from message fantasia.v1.AgentConfig
@@ -140,6 +140,11 @@ export type AgentInstance = Message<"fantasia.v1.AgentInstance"> & {
    * @generated from field: optional string error = 8;
    */
   error?: string;
+
+  /**
+   * @generated from field: optional string workstream_name = 9;
+   */
+  workstreamName?: string;
 };
 
 /**
@@ -172,6 +177,65 @@ export const SubtaskDefSchema: GenMessage<SubtaskDef> = /*@__PURE__*/
   messageDesc(file_fantasia_v1_types, 2);
 
 /**
+ * @generated from message fantasia.v1.MilestoneDef
+ */
+export type MilestoneDef = Message<"fantasia.v1.MilestoneDef"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+};
+
+/**
+ * Describes the message fantasia.v1.MilestoneDef.
+ * Use `create(MilestoneDefSchema)` to create a new message.
+ */
+export const MilestoneDefSchema: GenMessage<MilestoneDef> = /*@__PURE__*/
+  messageDesc(file_fantasia_v1_types, 3);
+
+/**
+ * @generated from message fantasia.v1.WorkstreamDef
+ */
+export type WorkstreamDef = Message<"fantasia.v1.WorkstreamDef"> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: repeated string dependencies = 3;
+   */
+  dependencies: string[];
+
+  /**
+   * @generated from field: repeated fantasia.v1.MilestoneDef emits = 4;
+   */
+  emits: MilestoneDef[];
+
+  /**
+   * @generated from field: repeated fantasia.v1.MilestoneDef waits_for = 5;
+   */
+  waitsFor: MilestoneDef[];
+};
+
+/**
+ * Describes the message fantasia.v1.WorkstreamDef.
+ * Use `create(WorkstreamDefSchema)` to create a new message.
+ */
+export const WorkstreamDefSchema: GenMessage<WorkstreamDef> = /*@__PURE__*/
+  messageDesc(file_fantasia_v1_types, 4);
+
+/**
  * @generated from message fantasia.v1.TaskPlan
  */
 export type TaskPlan = Message<"fantasia.v1.TaskPlan"> & {
@@ -199,6 +263,16 @@ export type TaskPlan = Message<"fantasia.v1.TaskPlan"> & {
    * @generated from field: fantasia.v1.EstimatedComplexity estimated_complexity = 5;
    */
   estimatedComplexity: EstimatedComplexity;
+
+  /**
+   * @generated from field: optional string context = 6;
+   */
+  context?: string;
+
+  /**
+   * @generated from field: repeated fantasia.v1.WorkstreamDef workstreams = 7;
+   */
+  workstreams: WorkstreamDef[];
 };
 
 /**
@@ -206,7 +280,7 @@ export type TaskPlan = Message<"fantasia.v1.TaskPlan"> & {
  * Use `create(TaskPlanSchema)` to create a new message.
  */
 export const TaskPlanSchema: GenMessage<TaskPlan> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 3);
+  messageDesc(file_fantasia_v1_types, 5);
 
 /**
  * @generated from message fantasia.v1.TaskReview
@@ -243,7 +317,7 @@ export type TaskReview = Message<"fantasia.v1.TaskReview"> & {
  * Use `create(TaskReviewSchema)` to create a new message.
  */
 export const TaskReviewSchema: GenMessage<TaskReview> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 4);
+  messageDesc(file_fantasia_v1_types, 6);
 
 /**
  * @generated from message fantasia.v1.TaskResult
@@ -292,7 +366,7 @@ export type TaskResult = Message<"fantasia.v1.TaskResult"> & {
  * Use `create(TaskResultSchema)` to create a new message.
  */
 export const TaskResultSchema: GenMessage<TaskResult> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 5);
+  messageDesc(file_fantasia_v1_types, 7);
 
 /**
  * @generated from message fantasia.v1.Task
@@ -376,7 +450,7 @@ export type Task = Message<"fantasia.v1.Task"> & {
  * Use `create(TaskSchema)` to create a new message.
  */
 export const TaskSchema: GenMessage<Task> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 6);
+  messageDesc(file_fantasia_v1_types, 8);
 
 /**
  * @generated from message fantasia.v1.MemoryEntry
@@ -428,7 +502,7 @@ export type MemoryEntry = Message<"fantasia.v1.MemoryEntry"> & {
  * Use `create(MemoryEntrySchema)` to create a new message.
  */
 export const MemoryEntrySchema: GenMessage<MemoryEntry> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 7);
+  messageDesc(file_fantasia_v1_types, 9);
 
 /**
  * @generated from message fantasia.v1.CostBreakdown
@@ -450,7 +524,7 @@ export type CostBreakdown = Message<"fantasia.v1.CostBreakdown"> & {
  * Use `create(CostBreakdownSchema)` to create a new message.
  */
 export const CostBreakdownSchema: GenMessage<CostBreakdown> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 8);
+  messageDesc(file_fantasia_v1_types, 10);
 
 /**
  * @generated from message fantasia.v1.TaskCounts
@@ -487,7 +561,7 @@ export type TaskCounts = Message<"fantasia.v1.TaskCounts"> & {
  * Use `create(TaskCountsSchema)` to create a new message.
  */
 export const TaskCountsSchema: GenMessage<TaskCounts> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 9);
+  messageDesc(file_fantasia_v1_types, 11);
 
 /**
  * @generated from message fantasia.v1.OrchestratorConfig
@@ -551,7 +625,7 @@ export type OrchestratorConfig = Message<"fantasia.v1.OrchestratorConfig"> & {
  * Use `create(OrchestratorConfigSchema)` to create a new message.
  */
 export const OrchestratorConfigSchema: GenMessage<OrchestratorConfig> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 10);
+  messageDesc(file_fantasia_v1_types, 12);
 
 /**
  * @generated from message fantasia.v1.AgentSpawnedEvent
@@ -568,7 +642,7 @@ export type AgentSpawnedEvent = Message<"fantasia.v1.AgentSpawnedEvent"> & {
  * Use `create(AgentSpawnedEventSchema)` to create a new message.
  */
 export const AgentSpawnedEventSchema: GenMessage<AgentSpawnedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 11);
+  messageDesc(file_fantasia_v1_types, 13);
 
 /**
  * @generated from message fantasia.v1.AgentStatusChangedEvent
@@ -595,7 +669,7 @@ export type AgentStatusChangedEvent = Message<"fantasia.v1.AgentStatusChangedEve
  * Use `create(AgentStatusChangedEventSchema)` to create a new message.
  */
 export const AgentStatusChangedEventSchema: GenMessage<AgentStatusChangedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 12);
+  messageDesc(file_fantasia_v1_types, 14);
 
 /**
  * @generated from message fantasia.v1.AgentTerminatedEvent
@@ -617,7 +691,7 @@ export type AgentTerminatedEvent = Message<"fantasia.v1.AgentTerminatedEvent"> &
  * Use `create(AgentTerminatedEventSchema)` to create a new message.
  */
 export const AgentTerminatedEventSchema: GenMessage<AgentTerminatedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 13);
+  messageDesc(file_fantasia_v1_types, 15);
 
 /**
  * @generated from message fantasia.v1.AgentMessageEvent
@@ -644,7 +718,7 @@ export type AgentMessageEvent = Message<"fantasia.v1.AgentMessageEvent"> & {
  * Use `create(AgentMessageEventSchema)` to create a new message.
  */
 export const AgentMessageEventSchema: GenMessage<AgentMessageEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 14);
+  messageDesc(file_fantasia_v1_types, 16);
 
 /**
  * @generated from message fantasia.v1.TaskCreatedEvent
@@ -661,7 +735,7 @@ export type TaskCreatedEvent = Message<"fantasia.v1.TaskCreatedEvent"> & {
  * Use `create(TaskCreatedEventSchema)` to create a new message.
  */
 export const TaskCreatedEventSchema: GenMessage<TaskCreatedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 15);
+  messageDesc(file_fantasia_v1_types, 17);
 
 /**
  * @generated from message fantasia.v1.TaskStatusChangedEvent
@@ -688,7 +762,7 @@ export type TaskStatusChangedEvent = Message<"fantasia.v1.TaskStatusChangedEvent
  * Use `create(TaskStatusChangedEventSchema)` to create a new message.
  */
 export const TaskStatusChangedEventSchema: GenMessage<TaskStatusChangedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 16);
+  messageDesc(file_fantasia_v1_types, 18);
 
 /**
  * @generated from message fantasia.v1.TaskCompletedEvent
@@ -710,7 +784,7 @@ export type TaskCompletedEvent = Message<"fantasia.v1.TaskCompletedEvent"> & {
  * Use `create(TaskCompletedEventSchema)` to create a new message.
  */
 export const TaskCompletedEventSchema: GenMessage<TaskCompletedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 17);
+  messageDesc(file_fantasia_v1_types, 19);
 
 /**
  * @generated from message fantasia.v1.TaskFailedEvent
@@ -732,7 +806,7 @@ export type TaskFailedEvent = Message<"fantasia.v1.TaskFailedEvent"> & {
  * Use `create(TaskFailedEventSchema)` to create a new message.
  */
 export const TaskFailedEventSchema: GenMessage<TaskFailedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 18);
+  messageDesc(file_fantasia_v1_types, 20);
 
 /**
  * @generated from message fantasia.v1.OrchestratorReadyEvent
@@ -745,7 +819,7 @@ export type OrchestratorReadyEvent = Message<"fantasia.v1.OrchestratorReadyEvent
  * Use `create(OrchestratorReadyEventSchema)` to create a new message.
  */
 export const OrchestratorReadyEventSchema: GenMessage<OrchestratorReadyEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 19);
+  messageDesc(file_fantasia_v1_types, 21);
 
 /**
  * @generated from message fantasia.v1.OrchestratorErrorEvent
@@ -762,7 +836,7 @@ export type OrchestratorErrorEvent = Message<"fantasia.v1.OrchestratorErrorEvent
  * Use `create(OrchestratorErrorEventSchema)` to create a new message.
  */
 export const OrchestratorErrorEventSchema: GenMessage<OrchestratorErrorEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 20);
+  messageDesc(file_fantasia_v1_types, 22);
 
 /**
  * @generated from message fantasia.v1.OrchestratorStoppedEvent
@@ -775,7 +849,7 @@ export type OrchestratorStoppedEvent = Message<"fantasia.v1.OrchestratorStoppedE
  * Use `create(OrchestratorStoppedEventSchema)` to create a new message.
  */
 export const OrchestratorStoppedEventSchema: GenMessage<OrchestratorStoppedEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 21);
+  messageDesc(file_fantasia_v1_types, 23);
 
 /**
  * @generated from message fantasia.v1.UserInputNeededEvent
@@ -797,7 +871,7 @@ export type UserInputNeededEvent = Message<"fantasia.v1.UserInputNeededEvent"> &
  * Use `create(UserInputNeededEventSchema)` to create a new message.
  */
 export const UserInputNeededEventSchema: GenMessage<UserInputNeededEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 22);
+  messageDesc(file_fantasia_v1_types, 24);
 
 /**
  * @generated from message fantasia.v1.CostUpdateEvent
@@ -819,7 +893,7 @@ export type CostUpdateEvent = Message<"fantasia.v1.CostUpdateEvent"> & {
  * Use `create(CostUpdateEventSchema)` to create a new message.
  */
 export const CostUpdateEventSchema: GenMessage<CostUpdateEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 23);
+  messageDesc(file_fantasia_v1_types, 25);
 
 /**
  * @generated from message fantasia.v1.SdkMessageEvent
@@ -841,7 +915,93 @@ export type SdkMessageEvent = Message<"fantasia.v1.SdkMessageEvent"> & {
  * Use `create(SdkMessageEventSchema)` to create a new message.
  */
 export const SdkMessageEventSchema: GenMessage<SdkMessageEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 24);
+  messageDesc(file_fantasia_v1_types, 26);
+
+/**
+ * @generated from message fantasia.v1.MilestoneReachedEvent
+ */
+export type MilestoneReachedEvent = Message<"fantasia.v1.MilestoneReachedEvent"> & {
+  /**
+   * @generated from field: string milestone_id = 1;
+   */
+  milestoneId: string;
+
+  /**
+   * @generated from field: string workstream_name = 2;
+   */
+  workstreamName: string;
+};
+
+/**
+ * Describes the message fantasia.v1.MilestoneReachedEvent.
+ * Use `create(MilestoneReachedEventSchema)` to create a new message.
+ */
+export const MilestoneReachedEventSchema: GenMessage<MilestoneReachedEvent> = /*@__PURE__*/
+  messageDesc(file_fantasia_v1_types, 27);
+
+/**
+ * @generated from message fantasia.v1.ToolUseEvent
+ */
+export type ToolUseEvent = Message<"fantasia.v1.ToolUseEvent"> & {
+  /**
+   * @generated from field: string agent_id = 1;
+   */
+  agentId: string;
+
+  /**
+   * @generated from field: string tool_use_id = 2;
+   */
+  toolUseId: string;
+
+  /**
+   * @generated from field: string tool_name = 3;
+   */
+  toolName: string;
+
+  /**
+   * @generated from field: string tool_input_json = 4;
+   */
+  toolInputJson: string;
+};
+
+/**
+ * Describes the message fantasia.v1.ToolUseEvent.
+ * Use `create(ToolUseEventSchema)` to create a new message.
+ */
+export const ToolUseEventSchema: GenMessage<ToolUseEvent> = /*@__PURE__*/
+  messageDesc(file_fantasia_v1_types, 28);
+
+/**
+ * @generated from message fantasia.v1.ToolResultEvent
+ */
+export type ToolResultEvent = Message<"fantasia.v1.ToolResultEvent"> & {
+  /**
+   * @generated from field: string agent_id = 1;
+   */
+  agentId: string;
+
+  /**
+   * @generated from field: string tool_use_id = 2;
+   */
+  toolUseId: string;
+
+  /**
+   * @generated from field: bool is_error = 3;
+   */
+  isError: boolean;
+
+  /**
+   * @generated from field: string output = 4;
+   */
+  output: string;
+};
+
+/**
+ * Describes the message fantasia.v1.ToolResultEvent.
+ * Use `create(ToolResultEventSchema)` to create a new message.
+ */
+export const ToolResultEventSchema: GenMessage<ToolResultEvent> = /*@__PURE__*/
+  messageDesc(file_fantasia_v1_types, 29);
 
 /**
  * @generated from message fantasia.v1.FantasiaEvent
@@ -944,6 +1104,24 @@ export type FantasiaEvent = Message<"fantasia.v1.FantasiaEvent"> & {
      */
     value: SdkMessageEvent;
     case: "sdkMessage";
+  } | {
+    /**
+     * @generated from field: fantasia.v1.MilestoneReachedEvent milestone_reached = 42;
+     */
+    value: MilestoneReachedEvent;
+    case: "milestoneReached";
+  } | {
+    /**
+     * @generated from field: fantasia.v1.ToolUseEvent tool_use = 43;
+     */
+    value: ToolUseEvent;
+    case: "toolUse";
+  } | {
+    /**
+     * @generated from field: fantasia.v1.ToolResultEvent tool_result = 44;
+     */
+    value: ToolResultEvent;
+    case: "toolResult";
   } | { case: undefined; value?: undefined };
 };
 
@@ -952,7 +1130,7 @@ export type FantasiaEvent = Message<"fantasia.v1.FantasiaEvent"> & {
  * Use `create(FantasiaEventSchema)` to create a new message.
  */
 export const FantasiaEventSchema: GenMessage<FantasiaEvent> = /*@__PURE__*/
-  messageDesc(file_fantasia_v1_types, 25);
+  messageDesc(file_fantasia_v1_types, 30);
 
 /**
  * @generated from enum fantasia.v1.AgentRole

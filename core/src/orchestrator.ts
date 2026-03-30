@@ -833,6 +833,7 @@ export class Orchestrator {
       );
       this.activeAgents.set(broomstick.instance.id, broomstick);
       broomstick.instance.currentTaskId = task.id;
+      broomstick.instance.workstreamName = workstream.name;
       this.events.emit({ type: 'agent:spawned', agent: broomstick.instance });
       log.info('executeWorkstreams: Broomstick spawned for workstream', {
         agentId: broomstick.instance.id,
@@ -850,7 +851,10 @@ export class Orchestrator {
         env: this.config.env,
       };
       if (wsMilestones && milestoneTracker) {
-        const { server: milestoneServer } = createMilestoneTools(this.sdk, milestoneTracker, workstream.name);
+        const { server: milestoneServer } = createMilestoneTools(
+          this.sdk, milestoneTracker, workstream.name,
+          broomstick.instance.id, this.events,
+        );
         runOptions.extraSdkOptions = {
           mcpServers: { milestones: milestoneServer },
         };

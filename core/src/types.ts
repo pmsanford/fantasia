@@ -62,6 +62,8 @@ export interface AgentInstance {
   startedAt: number;
   lastActivityAt: number;
   error?: string;
+  /** Set for broomstick agents to identify which workstream they are executing. */
+  workstreamName?: string;
 }
 
 // ─── Task Types ─────────────────────────────────────────────────
